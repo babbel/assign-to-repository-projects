@@ -41,9 +41,9 @@ try {
     octokit,
   });
 
-  await rpm.assign(node_id, projects);
+  const assignedProjects = await rpm.assign(node_id, projects);
 
-  core.setOutput('projects', rpm.projects.map((p) => p.title).join(' '));
+  core.setOutput('projects', assignedProjects.map((p) => p.title).join(' '));
 } catch (error) {
   core.setFailed(error.message);
 }

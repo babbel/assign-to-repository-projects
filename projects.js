@@ -10,6 +10,7 @@ class RepositoryProjectsManager {
     await this.#init();
     await this.#assignPRToProjects(pullRequestId, projectNames);
     await this.#unassignPRFromProjects(pullRequestId, projectNames);
+    return this.#assignedProjects(pullRequestId);
   }
 
   async #init() {

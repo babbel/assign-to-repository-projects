@@ -10841,9 +10841,9 @@ try {
     octokit,
   });
 
-  await rpm.assign(node_id, projects);
+  const assignedProjects = await rpm.assign(node_id, projects);
 
-  _actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput('projects', rpm.projects.map((p) => p.title).join(' '));
+  _actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput('projects', assignedProjects.map((p) => p.title).join(' '));
 } catch (error) {
   _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(error.message);
 }
@@ -10871,6 +10871,7 @@ class RepositoryProjectsManager {
     await this.#init();
     await this.#assignPRToProjects(pullRequestId, projectNames);
     await this.#unassignPRFromProjects(pullRequestId, projectNames);
+    return this.#assignedProjects(pullRequestId);
   }
 
   async #init() {
