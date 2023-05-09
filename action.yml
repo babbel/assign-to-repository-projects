@@ -1,0 +1,17 @@
+name: 'assign-to-repository-projects'
+description: 'Assign a PR to each project of a list of project V2 linked to this repository'
+inputs:
+  projects:
+    description: 'List of space delimited project names to assign current PR (given by GitHub Actinon pull_request event) to'
+    required: true
+    default: ''
+  assign_pr:
+    description: 'If set to `true` assign the current PR to all given projects.'
+    required: false
+    default: false
+outputs:
+  projects:
+    description: 'List of space delimited projets names the PR is assiged to'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
