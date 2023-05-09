@@ -137,6 +137,7 @@ class RepositoryProjectsManager {
     return result;
   }
 
+  // unassign PR from projects that are not listed by projectNames
   async #unassignPRFromProjects(pullRequestId, projectNames) {
     const assignedProjects = await this.#assignedProjects(pullRequestId);
 
