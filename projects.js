@@ -42,7 +42,7 @@ class RepositoryProjectsManager {
       // async, because more than 5 breaks API endpoint
       const item = await this.#assignPRtoProject(pullRequestId, project);
 
-      // at creation, items can only be assigned to projecs but initially 
+      // at creation, items can only be assigned to projecs but initially
       // have Status value null.
       // the `Todo` Status value is created by default for each new project and
       // must be assiged. to do so, the option value needs to be looked up first.
