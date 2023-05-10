@@ -5973,9 +5973,9 @@ Body.prototype = {
 	json() {
 		var _this2 = this;
 
-		return this.text().then(function (text) {
+		return consumeBody.call(this).then(function (buffer) {
 			try {
-				return JSON.parse(text);
+				return JSON.parse(buffer.toString());
 			} catch (err) {
 				return Body.Promise.reject(new FetchError(`invalid json response body at ${_this2.url} reason: ${err.message}`, 'invalid-json'));
 			}
@@ -5989,7 +5989,7 @@ Body.prototype = {
   */
 	text() {
 		return consumeBody.call(this).then(function (buffer) {
-			return new TextDecoder().decode(buffer);
+			return buffer.toString();
 		});
 	},
 
@@ -10794,11 +10794,9 @@ module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("zlib");
 __nccwpck_require__.a(__webpack_module__, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2186);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(5438);
-/* harmony import */ var _octokit_core__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(6762);
-/* harmony import */ var _octokit_auth_token__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(334);
-/* harmony import */ var _octokit_plugin_paginate_graphql__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(5883);
-/* harmony import */ var _projects_js__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(2621);
-
+/* harmony import */ var _octokit_core__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(6762);
+/* harmony import */ var _octokit_plugin_paginate_graphql__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(5883);
+/* harmony import */ var _projects_js__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(2621);
 
 
 
@@ -10807,21 +10805,16 @@ __nccwpck_require__.a(__webpack_module__, async (__webpack_handle_async_dependen
 
  // eslint-disable-line import/extensions
 
-// assamble auth octokit client
-// expecting token with tokenType "installation"
-const authentication = (0,_octokit_auth_token__WEBPACK_IMPORTED_MODULE_2__.createTokenAuth)(process.env.GITHUB_TOKEN);
-const auth = await authentication();
-
-const GraphQlOctokit = _octokit_core__WEBPACK_IMPORTED_MODULE_3__/* .Octokit.plugin */ .v.plugin(_octokit_plugin_paginate_graphql__WEBPACK_IMPORTED_MODULE_4__/* .paginateGraphql */ .A);
+const GraphQlOctokit = _octokit_core__WEBPACK_IMPORTED_MODULE_2__/* .Octokit.plugin */ .v.plugin(_octokit_plugin_paginate_graphql__WEBPACK_IMPORTED_MODULE_3__/* .paginateGraphql */ .A);
 
 // https://github.com/octokit/authentication-strategies.js
 // example: https://github.com/octokit/graphql.js/issues/61#issuecomment-542399763
 // for token type installation, pass only the token
-const octokit = new GraphQlOctokit({ auth: auth.token });
+const octokit = new GraphQlOctokit({ auth: process.env.GITHUB_TOKEN });
 
 try {
-  const projectsInput = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('projects');
-  const projects = projectsInput.split(/\s+/);
+  const titlesInput = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('project-titles');
+  const titles = titlesInput.split(/\s+/);
 
   // requries a github action event of type pull_request
   const {
@@ -10835,15 +10828,15 @@ try {
     },
   } = _actions_github__WEBPACK_IMPORTED_MODULE_1__;
 
-  const rpm = new _projects_js__WEBPACK_IMPORTED_MODULE_5__/* .RepositoryProjectsManager */ .n({
+  const rpm = new _projects_js__WEBPACK_IMPORTED_MODULE_4__/* .RepositoryProjectsManager */ .n({
     owner: repository.owner.login,
     repository: repository.name,
     octokit,
   });
 
-  const assignedProjects = await rpm.assign(node_id, projects);
+  const assignedProjectTitles = await rpm.assign(node_id, titles);
 
-  _actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput('projects', assignedProjects.map((p) => p.title).join(' '));
+  _actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput('project-titles', assignedProjectTitles.map((p) => p.title).join(' '));
 } catch (error) {
   _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(error.message);
 }
