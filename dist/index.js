@@ -10896,7 +10896,7 @@ class RepositoryProjectsManager {
       // async, because more than 5 breaks API endpoint
       const item = await this.#assignPRtoProject(pullRequestId, project);
 
-      // at creation, items can only be assigned to projecs but initially 
+      // at creation, items can only be assigned to projecs but initially
       // have Status value null.
       // the `Todo` Status value is created by default for each new project and
       // must be assiged. to do so, the option value needs to be looked up first.
@@ -10912,7 +10912,7 @@ class RepositoryProjectsManager {
         repository(owner: "${this.owner}", name: "${this.repositoryName}") {
           name
           id
-          projectsV2(first: 10, after: $cursor) {
+          projectsV2(first: 100, after: $cursor) {
             nodes {
               id
               title
@@ -10945,7 +10945,7 @@ class RepositoryProjectsManager {
   // permissions for projects v2 and pull requests
   async #assignPRtoProject(pullRequestId, project) {
     const { addProjectV2ItemById: { item } } = await this.octokit.graphql(`
-      mutation{
+      mutation {
         addProjectV2ItemById(
           input: {
             clientMutationId: "${this.clientMutationId}",
@@ -10970,7 +10970,7 @@ class RepositoryProjectsManager {
 
     // https://docs.github.com/en/graphql/reference/mutations#updateprojectv2itemfieldvalue
     const result = await this.octokit.graphql(`
-      mutation{
+      mutation {
         updateProjectV2ItemFieldValue(
           input: {
             clientMutationId: "${this.clientMutationId}",
@@ -11010,7 +11010,7 @@ class RepositoryProjectsManager {
         node(id:"${pullRequestId}") {
           ... on PullRequest {
             number
-            projectsV2(first: 10, after: $cursor) {
+            projectsV2(first: 100, after: $cursor) {
               nodes {
                 id
                 title
@@ -11035,7 +11035,7 @@ class RepositoryProjectsManager {
         node(id:"${project.id}") {
           ... on ProjectV2 {
             number
-            items(first: 10, after: $cursor) {
+            items(first: 100, after: $cursor) {
               nodes {
                 id
                 content {
@@ -11060,7 +11060,7 @@ class RepositoryProjectsManager {
   // permissions for projects v2 and pull requests
   async #deleteProjectItem(project, item) {
     const { deleteProjectV2Item: deletedItemId } = await this.octokit.graphql(`
-      mutation{
+      mutation {
         deleteProjectV2Item(
           input: {
             clientMutationId: "${this.clientMutationId}",

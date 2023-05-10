@@ -58,7 +58,7 @@ class RepositoryProjectsManager {
         repository(owner: "${this.owner}", name: "${this.repositoryName}") {
           name
           id
-          projectsV2(first: 10, after: $cursor) {
+          projectsV2(first: 100, after: $cursor) {
             nodes {
               id
               title
@@ -156,7 +156,7 @@ class RepositoryProjectsManager {
         node(id:"${pullRequestId}") {
           ... on PullRequest {
             number
-            projectsV2(first: 10, after: $cursor) {
+            projectsV2(first: 100, after: $cursor) {
               nodes {
                 id
                 title
@@ -181,7 +181,7 @@ class RepositoryProjectsManager {
         node(id:"${project.id}") {
           ... on ProjectV2 {
             number
-            items(first: 10, after: $cursor) {
+            items(first: 100, after: $cursor) {
               nodes {
                 id
                 content {
