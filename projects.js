@@ -91,7 +91,7 @@ class RepositoryProjectsManager {
   // permissions for projects v2 and pull requests
   async #assignPRtoProject(pullRequestId, project) {
     const { addProjectV2ItemById: { item } } = await this.octokit.graphql(`
-      mutation{
+      mutation {
         addProjectV2ItemById(
           input: {
             clientMutationId: "${this.clientMutationId}",
@@ -116,7 +116,7 @@ class RepositoryProjectsManager {
 
     // https://docs.github.com/en/graphql/reference/mutations#updateprojectv2itemfieldvalue
     const result = await this.octokit.graphql(`
-      mutation{
+      mutation {
         updateProjectV2ItemFieldValue(
           input: {
             clientMutationId: "${this.clientMutationId}",
@@ -206,7 +206,7 @@ class RepositoryProjectsManager {
   // permissions for projects v2 and pull requests
   async #deleteProjectItem(project, item) {
     const { deleteProjectV2Item: deletedItemId } = await this.octokit.graphql(`
-      mutation{
+      mutation {
         deleteProjectV2Item(
           input: {
             clientMutationId: "${this.clientMutationId}",
