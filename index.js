@@ -20,8 +20,8 @@ const GraphQlOctokit = Octokit.plugin(paginateGraphql);
 const octokit = new GraphQlOctokit({ auth: auth.token });
 
 try {
-  const projectsInput = core.getInput('projects');
-  const projects = projectsInput.split(/\s+/);
+  const titlesInput = core.getInput('project-titles');
+  const titles = titlesInput.split(/\s+/);
 
   // requries a github action event of type pull_request
   const {
@@ -41,9 +41,9 @@ try {
     octokit,
   });
 
-  const assignedProjects = await rpm.assign(node_id, projects);
+  const assignedProjectTitles = await rpm.assign(node_id, titles);
 
-  core.setOutput('projects', assignedProjects.map((p) => p.title).join(' '));
+  core.setOutput('project-titles', assignedProjectTitles.map((p) => p.title).join(' '));
 } catch (error) {
   core.setFailed(error.message);
 }
