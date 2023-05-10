@@ -6,10 +6,10 @@ class RepositoryProjectsManager {
     this.clientMutationId = `assign-to-repository-projects-${owner}-${repository}`;
   }
 
-  async assign(pullRequestId, projectNames) {
+  async assign(pullRequestId, titles) {
     await this.#init();
-    await this.#assignPRToProjects(pullRequestId, projectNames);
-    await this.#unassignPRFromProjects(pullRequestId, projectNames);
+    await this.#assignPRToProjects(pullRequestId, titles);
+    await this.#unassignPRFromProjects(pullRequestId, titles);
     return this.#assignedProjects(pullRequestId);
   }
 
@@ -35,19 +35,18 @@ class RepositoryProjectsManager {
     await this.#fetchRepositoryAndProjects();
   }
 
-  async #assignPRToProjects(pullRequestId, projectNames) {
-    const projects = this.projects.filter((p) => projectNames.includes(p.title));
+  async #assignPRToProjects(pullRequestId, titles) {
+    const projects = this.projects.filter((p) => titles.includes(p.title));
 
     for await (const project of projects) {
       // async, because more than 5 breaks API endpoint
       const item = await this.#assignPRtoProject(pullRequestId, project);
 
-      // items can only be assigned to projecs.
-      // after that the item has Status value null.
-      // only then, they can be assigned a particular Status.
-      // the `Todo` Status is created by default for each new project.
-      // to assign Status value `Todo` to an item, we need to explicitely assign it.
-      // (project workflows cannot be used for this task because there is no API
+      // at creation, items can only be assigned to projecs but initially 
+      // have Status value null.
+      // the `Todo` Status value is created by default for each new project and
+      // must be assiged. to do so, the option value needs to be looked up first.
+      // (project automations cannot be used for this task because there is no API
       // for creating or updating ProjectV2 workflows.)
       await this.#assignStatusTodo(project, item);
     }
@@ -138,11 +137,11 @@ class RepositoryProjectsManager {
     return result;
   }
 
-  // unassign PR from projects that are not listed by projectNames
-  async #unassignPRFromProjects(pullRequestId, projectNames) {
+  // unassign PR from projects that are not listed by titles
+  async #unassignPRFromProjects(pullRequestId, titles) {
     const assignedProjects = await this.#assignedProjects(pullRequestId);
 
-    const projects = assignedProjects.filter((p) => !projectNames.includes(p.title));
+    const projects = assignedProjects.filter((p) => !titles.includes(p.title));
 
     for await (const project of projects) {
       // async, because more than 5 breaks API endpoint
