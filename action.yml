@@ -5,10 +5,6 @@ inputs:
     description: 'List of space delimited project titles to assign current PR (given by GitHub Action pull_request event) to'
     required: true
     default: ''
-  assign_pr:
-    description: 'If set to `true` assign the current PR to all given projects.'
-    required: false
-    default: false
 outputs:
   project-titles:
     description: 'List of space delimited projets titles the PR has been assiged to'
