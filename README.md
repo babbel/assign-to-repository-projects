@@ -18,9 +18,9 @@ Moreover, the GitHub token of a GitHub App installation is expected as environme
 
 ## Inputs
 
-| Name             | Description                                                                                     | Type         | Required? | Default |
-|------------------|-------------------------------------------------------------------------------------------------|--------------|-----------|---------|
-| `project-titles` | Space-separated list of titles of projects linked to this repository the PR will be assigned to | `string`     | YES       | ''      |
+| Name             | Description                                                                                     | Type         | Required? |
+|------------------|-------------------------------------------------------------------------------------------------|--------------|-----------|
+| `project-titles` | Space-separated list of titles of projects linked to this repository the PR will be assigned to | `string`     | YES       |
 
 
 ## Outputs
