@@ -6,7 +6,7 @@ inputs:
     required: true
 outputs:
   project-titles:
-    description: 'List of space delimited projets titles the PR has been assiged to'
+    description: 'List of space delimited projects titles the PR has been assiged to'
 runs:
   using: 'node16'
   main: 'dist/index.js'
