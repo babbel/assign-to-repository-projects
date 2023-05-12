@@ -8,8 +8,8 @@ const GraphQlOctokit = Octokit.plugin(paginateGraphql);
 const octokit = new GraphQlOctokit({ auth: 'fake-token-value' }); // don't use default GITHUB_TOKEN token from env
 
 const rpm = new RepositoryProjectsManager({
-  owner: 'babbel-sandbox',
-  repository: 'test-repo-jsaito-3',
+  owner: 'acme',
+  repository: 'example-repository',
   octokit,
 });
 
