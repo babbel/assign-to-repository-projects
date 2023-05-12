@@ -13,23 +13,7 @@ const rpm = new RepositoryProjectsManager({
   octokit,
 });
 
-describe('RepositoryProjectsManager.assing() posts requests to the API', () => {
-  beforeEach(() => {
-    nock.restore();
-    nock.activate();
-  });
-
-  afterEach(() => {
-    nock.restore();
-  });
-
-  test('when the PR is already assigned to a project', async () => {
-    const titles = [
-      'layer-100/bar',
-    ];
-
-    const pullRequestNumber = 'PR_kwDOJSgWus5QXGKx';
-
+const nockHTTPRequestsFoCreatingSingleProject = (nock) => {
     nock('https://api.github.com')
       .post('/graphql', (body) => /.*organization.login:.*/.test(body.query))
       .reply(200, {
@@ -133,6 +117,39 @@ describe('RepositoryProjectsManager.assing() posts requests to the API', () => {
           },
         },
       );
+}
+
+describe('RepositoryProjectsManager.assing() posts requests to the API', () => {
+  beforeEach(() => {
+    nock.restore();
+    nock.activate();
+  });
+
+  afterEach(() => {
+    nock.restore();
+  });
+
+
+  test('when the PR is not assigned to a project yet', async () => {
+    const titles = [ 'layer-100/bar' ];
+
+    const pullRequestNumber = 'PR_kwDOJSgWus5QXGKx';
+    nockHTTPRequestsFoCreatingSingleProject(nock);
+
+    const outputProjects = await rpm.assign(pullRequestNumber, titles);
+    const outputTitles = outputProjects.map((p) => p.title);
+
+    expect(outputTitles).toEqual(titles);
+  });
+
+  // setup and requests are identical fore example for assigning the PR to a new project because
+  // addProjectV2ItemById and updateProjectV2ItemFieldValue are idempotent.
+  test('when the PR is already assigned to a project', async () => {
+    const titles = [ 'layer-100/bar' ];
+
+    const pullRequestNumber = 'PR_kwDOJSgWus5QXGKx';
+
+    nockHTTPRequestsFoCreatingSingleProject(nock);
 
     const outputProjects = await rpm.assign(pullRequestNumber, titles);
     const outputTitles = outputProjects.map((p) => p.title);
