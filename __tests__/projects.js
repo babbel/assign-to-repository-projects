@@ -160,4 +160,176 @@ describe('RepositoryProjectsManager.assing() posts requests to the API', () => {
 
     expect(outputTitles).toEqual(titles);
   });
+
+  test('when the PR is assigend to one project but should not be assigned to any project', async () => {
+    const titles = [];
+
+    nock('https://api.github.com')
+      .post('/graphql', (body) => /.*organization.login:.*/.test(body.query))
+      .reply(200, {
+        data: {
+          organization: {
+            id: 'O_0000000001',
+            name: 'Acme Corporation',
+          },
+        },
+      })
+      .post('/graphql', (body) => /projectsV2.first:/.test(body.query))
+      .reply(
+        200,
+        {
+          data: {
+            repository: {
+              name: 'example-repository',
+              id: 'R_0000000001',
+              projectsV2: {
+                nodes: [
+                  {
+                    id: 'PVT_0000000000000001',
+                    title: 'layer-100/bar',
+                    number: 1099,
+                    fields: {
+                      nodes: [
+                        {},
+                        {},
+                        {
+                          id: 'PVTSSF_00000000000000000000001',
+                          name: 'Status',
+                          options: [
+                            {
+                              id: '00000001',
+                              name: 'Todo',
+                            },
+                            {
+                              id: '00000002',
+                              name: 'In Progress',
+                            },
+                            {
+                              id: '00000003',
+                              name: 'Done',
+                            },
+                          ],
+                        },
+                        {},
+                        {},
+                      ],
+                    },
+                  },
+                ],
+                pageInfo: {
+                  hasNextPage: false,
+                  endCursor: 'Nw',
+                },
+              },
+            },
+          },
+        },
+      )
+      .post('/graphql', (body) => /addProjectV2ItemById/.test(body.query))
+      .reply(
+        200,
+        {
+          data: {
+            addProjectV2ItemById: {
+              item: {
+                id: 'PVTI_0000000000000001',
+              },
+            },
+          },
+        },
+      )
+      .post('/graphql', (body) => /updateProjectV2ItemFieldValue/.test(body.query))
+      .reply(
+        200,
+        {
+          data: {
+            updateProjectV2ItemFieldValue: { projectV2Item: { id: 'PVTI_0000000000000001' } },
+          },
+        },
+      )
+      .post('/graphql', (body) => /on PullRequest/.test(body.query))
+      .reply(
+        200,
+        {
+          data: {
+            node:
+             {
+               number: 74,
+               projectsV2: {
+                 nodes: [
+                   {
+                     id: 'PVT_0000000000000001',
+                     title: 'layer-100/bar',
+                   },
+                 ],
+                 pageInfo: {
+                   hasNextPage: false,
+                   endCursor: 'MQ',
+                 },
+               },
+             },
+          },
+        },
+      )
+      .post('/graphql', (body) => /\.\.\. on ProjectV2 /.test(body.query))
+      .reply(
+        200,
+        {
+          data: {
+            node: {
+              number: 1099,
+              items: {
+                nodes: [
+                  {
+                    id: 'PVTI_00000000000000000000001',
+                    content: {
+                      id: 'PR_0000000000000001',
+                    },
+                  },
+                ],
+                pageInfo: {
+                  hasNextPage: false,
+                  endCursor: 'MQ',
+                },
+              },
+            },
+          },
+        },
+      )
+      .post('/graphql', (body) => /deleteProjectV2Item/.test(body.query))
+      .reply(
+        200,
+        {
+          data: {
+            deleteProjectV2Item: { deletedItemId: 'PVTI_00000000000000000000000' },
+          },
+        },
+      )
+      .post('/graphql', (body) => /on PullRequest/.test(body.query))
+      .reply(
+        200,
+        {
+          data: {
+            node:
+             {
+               number: 74,
+               projectsV2: {
+                 nodes: [],
+                 pageInfo: {
+                   hasNextPage: false,
+                   endCursor: 'MQ',
+                 },
+               },
+             },
+          },
+        },
+      );
+
+    const pullRequestNumber = 'PR_0000000000000001';
+
+    const outputProjects = await rpm.assign(pullRequestNumber, titles);
+    const outputTitles = outputProjects.map((p) => p.title);
+
+    expect(outputTitles).toEqual(titles);
+  });
 });
