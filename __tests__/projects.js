@@ -13,98 +13,103 @@ const rpm = new RepositoryProjectsManager({
   octokit,
 });
 
-const nockHTTPRequestsFoCreatingSingleProject = (nock) => {
-    nock('https://api.github.com')
-      .post('/graphql', (body) => /.*organization.login:.*/.test(body.query))
-      .reply(200, {
+const nockHTTPRequestsFoCreatingSingleProject = () => {
+  nock('https://api.github.com')
+    .post('/graphql', (body) => /.*organization.login:.*/.test(body.query))
+    .reply(200, {
+      data: {
+        organization: {
+          id: 'O_0000000001',
+          name: 'Acme Corporation',
+        },
+      },
+    })
+    .post('/graphql', (body) => /projectsV2.first:/.test(body.query))
+    .reply(
+      200,
+      {
         data: {
-          organization: {
-            id: 'O_kgDOAnsQgg',
-            name: 'Babbel Sandbox',
-          },
-        },
-      })
-      .post('/graphql', (body) => /projectsV2.first:/.test(body.query))
-      .reply(
-        200,
-        {
-          data: {
-            repository: {
-              name: 'example-repository',
-              id: 'R_0000000001',
-              projectsV2: {
-                nodes: [
-                  {
-                    id: 'PVT_kwDOAnsQgs4AQFxl',
-                    title: 'layer-100/bar',
-                    number: 1099,
-                    fields: {
-                      nodes: [{}, {},
-                        {
-                          id: 'PVTSSF_lADOAnsQgs4AQFxlzgKRc_A',
-                          name: 'Status',
-                          options: [
-                            {
-                              id: 'f75ad846',
-                              name: 'Todo',
-                            },
-                            {
-                              id: '47fc9ee4',
-                              name: 'In Progress',
-                            },
-                            {
-                              id: '98236657',
-                              name: 'Done',
-                            },
-                          ],
-                        }, {}, {}],
-                    },
+          repository: {
+            name: 'example-repository',
+            id: 'R_0000000001',
+            projectsV2: {
+              nodes: [
+                {
+                  id: 'PVT_0000000000000001',
+                  title: 'layer-100/bar',
+                  number: 1099,
+                  fields: {
+                    nodes: [
+                      {},
+                      {},
+                      {
+                        id: 'PVTSSF_00000000000000000000001',
+                        name: 'Status',
+                        options: [
+                          {
+                            id: '00000001',
+                            name: 'Todo',
+                          },
+                          {
+                            id: '00000002',
+                            name: 'In Progress',
+                          },
+                          {
+                            id: '00000003',
+                            name: 'Done',
+                          },
+                        ],
+                      },
+                      {},
+                      {},
+                    ],
                   },
-                ],
-                pageInfo: {
-                  hasNextPage: false,
-                  endCursor: 'Nw',
                 },
+              ],
+              pageInfo: {
+                hasNextPage: false,
+                endCursor: 'Nw',
               },
             },
           },
         },
-      )
-      .post('/graphql', (body) => /addProjectV2ItemById/.test(body.query))
-      .reply(
-        200,
-        {
-          data: {
-            addProjectV2ItemById: {
-              item: {
-                id: 'PVTI_lADOAnsQgs4AQFxlzgGroec',
-              },
+      },
+    )
+    .post('/graphql', (body) => /addProjectV2ItemById/.test(body.query))
+    .reply(
+      200,
+      {
+        data: {
+          addProjectV2ItemById: {
+            item: {
+              id: 'PVTI_0000000000000001',
             },
           },
         },
-      )
-      .post('/graphql', (body) => /updateProjectV2ItemFieldValue/.test(body.query))
-      .reply(
-        200,
-        {
-          data: {
-            updateProjectV2ItemFieldValue: { projectV2Item: { id: 'PVTI_lADOAnsQgs4AQFxlzgGroec' } },
-          },
+      },
+    )
+    .post('/graphql', (body) => /updateProjectV2ItemFieldValue/.test(body.query))
+    .reply(
+      200,
+      {
+        data: {
+          updateProjectV2ItemFieldValue: { projectV2Item: { id: 'PVTI_0000000000000001' } },
         },
-      )
-      .post('/graphql', (body) => /on PullRequest/.test(body.query))
-      .twice()
-      .reply(
-        200,
-        {
-          data: {
-            node:
+      },
+    )
+    .post('/graphql', (body) => /on PullRequest/.test(body.query))
+    .twice()
+    .reply(
+      200,
+      {
+        data: {
+          node:
              {
                number: 74,
                projectsV2: {
                  nodes: [
                    {
-                     id: 'PVT_kwDOAnsQgs4AQFxl',
+                     id: 'PVT_0000000000000001',
                      title: 'layer-100/bar',
                    },
                  ],
@@ -114,10 +119,10 @@ const nockHTTPRequestsFoCreatingSingleProject = (nock) => {
                  },
                },
              },
-          },
         },
-      );
-}
+      },
+    );
+};
 
 describe('RepositoryProjectsManager.assing() posts requests to the API', () => {
   beforeEach(() => {
@@ -129,12 +134,11 @@ describe('RepositoryProjectsManager.assing() posts requests to the API', () => {
     nock.restore();
   });
 
-
   test('when the PR is not assigned to a project yet', async () => {
-    const titles = [ 'layer-100/bar' ];
+    const titles = ['layer-100/bar'];
 
-    const pullRequestNumber = 'PR_kwDOJSgWus5QXGKx';
-    nockHTTPRequestsFoCreatingSingleProject(nock);
+    const pullRequestNumber = 'PR_0000000000000001';
+    nockHTTPRequestsFoCreatingSingleProject();
 
     const outputProjects = await rpm.assign(pullRequestNumber, titles);
     const outputTitles = outputProjects.map((p) => p.title);
@@ -145,11 +149,11 @@ describe('RepositoryProjectsManager.assing() posts requests to the API', () => {
   // setup and requests are identical fore example for assigning the PR to a new project because
   // addProjectV2ItemById and updateProjectV2ItemFieldValue are idempotent.
   test('when the PR is already assigned to a project', async () => {
-    const titles = [ 'layer-100/bar' ];
+    const titles = ['layer-100/bar'];
 
-    const pullRequestNumber = 'PR_kwDOJSgWus5QXGKx';
+    const pullRequestNumber = 'PR_0000000000000001';
 
-    nockHTTPRequestsFoCreatingSingleProject(nock);
+    nockHTTPRequestsFoCreatingSingleProject();
 
     const outputProjects = await rpm.assign(pullRequestNumber, titles);
     const outputTitles = outputProjects.map((p) => p.title);
