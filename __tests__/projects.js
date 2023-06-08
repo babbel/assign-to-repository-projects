@@ -76,7 +76,6 @@ const nockHTTPRequestsForAssigningSinglePR = () => {
       },
     )
     .post('/graphql', (body) => /on PullRequest/.test(body.query))
-    .twice()
     .reply(
       200,
       {
@@ -118,7 +117,6 @@ const nockHTTPRequestsForAssigningSinglePR = () => {
       },
     )
     .post('/graphql', (body) => /on PullRequest/.test(body.query))
-    .twice()
     .reply(
       200,
       {
@@ -351,7 +349,12 @@ const nockHTTPRequestsForUnassigning = () => {
                {
                  number: 74,
                  projectsV2: {
-                   nodes: [],
+                   nodes: [
+                     {
+                       id: 'PVT_0000000000000001',
+                       title: 'layer-100/bar',
+                     },
+                   ],
                    pageInfo: {
                      hasNextPage: false,
                      endCursor: 'MQ',
@@ -380,30 +383,6 @@ const nockHTTPRequestsForUnassigning = () => {
       {
         data: {
           updateProjectV2ItemFieldValue: { projectV2Item: { id: 'PVTI_0000000000000001' } },
-        },
-      },
-    )
-    .post('/graphql', (body) => /on PullRequest/.test(body.query))
-    .reply(
-      200,
-      {
-        data: {
-          node:
-             {
-               number: 74,
-               projectsV2: {
-                 nodes: [
-                   {
-                     id: 'PVT_0000000000000001',
-                     title: 'layer-100/bar',
-                   },
-                 ],
-                 pageInfo: {
-                   hasNextPage: false,
-                   endCursor: 'MQ',
-                 },
-               },
-             },
         },
       },
     )
