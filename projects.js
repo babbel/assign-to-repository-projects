@@ -36,7 +36,12 @@ class RepositoryProjectsManager {
   }
 
   async #assignPRToProjects(pullRequestId, titles) {
-    const projects = this.projects.filter((p) => titles.includes(p.title));
+    const alreadyAssignedProjects = await this.#assignedProjects(pullRequestId);
+    const alreadyAssignedTitles = alreadyAssignedProjects.map((p) => p.title);
+
+    const projects = this.projects
+      .filter((p) => titles.includes(p.title))
+      .filter((p) => !alreadyAssignedTitles.includes(p.title));
 
     for await (const project of projects) {
       // async, because more than 5 breaks API endpoint
