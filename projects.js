@@ -8,8 +8,11 @@ class RepositoryProjectsManager {
 
   async assign(pullRequestId, titles) {
     await this.#init();
-    await this.#assignPRToProjects(pullRequestId, titles);
-    await this.#unassignPRFromProjects(pullRequestId, titles);
+
+    const assignedProjects = await this.#assignedProjects(pullRequestId);
+    await this.#assignPRToProjects(pullRequestId, titles, assignedProjects);
+    await this.#unassignPRFromProjects(pullRequestId, titles, assignedProjects);
+
     return this.#assignedProjects(pullRequestId);
   }
 
@@ -35,8 +38,12 @@ class RepositoryProjectsManager {
     await this.#fetchRepositoryAndProjects();
   }
 
-  async #assignPRToProjects(pullRequestId, titles) {
-    const projects = this.projects.filter((p) => titles.includes(p.title));
+  async #assignPRToProjects(pullRequestId, titles, assignedProjects) {
+    const assignedTitles = assignedProjects.map((p) => p.title);
+
+    const projects = this.projects
+      .filter((p) => titles.includes(p.title))
+      .filter((p) => !assignedTitles.includes(p.title));
 
     for await (const project of projects) {
       // async, because more than 5 breaks API endpoint
@@ -138,9 +145,7 @@ class RepositoryProjectsManager {
   }
 
   // unassign PR from projects that are not listed by titles
-  async #unassignPRFromProjects(pullRequestId, titles) {
-    const assignedProjects = await this.#assignedProjects(pullRequestId);
-
+  async #unassignPRFromProjects(pullRequestId, titles, assignedProjects) {
     const projects = assignedProjects.filter((p) => !titles.includes(p.title));
 
     for await (const project of projects) {
