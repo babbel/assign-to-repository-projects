@@ -34,7 +34,7 @@ class RepositoryProjectsManager {
 
     for await (const project of projects) {
       // async, because more than 5 breaks API endpoint
-      const item = await this.#assignPRtoProject(pullRequestId, project);
+      const item = await this.#assignPRtoProject(pullRequestId, project, this.clientMutationId);
 
       // at creation, items can only be assigned to projecs but initially
       // have Status value null.
@@ -44,29 +44,6 @@ class RepositoryProjectsManager {
       // for creating or updating ProjectV2 workflows.)
       await this.#assignStatusTodo(project, item);
     }
-  }
-
-
-  // requires GitHub App installation token with read and write
-  // permissions for projects v2 and pull requests
-  async #assignPRtoProject(pullRequestId, project) {
-    const { addProjectV2ItemById: { item } } = await this.octokit.graphql(`
-      mutation {
-        addProjectV2ItemById(
-          input: {
-            clientMutationId: "${this.clientMutationId}",
-            contentId: "${pullRequestId}",
-            projectId: "${project.id}",
-          }
-        )
-        {
-          item {
-            id
-          }
-        }
-      }`);
-
-    return item;
   }
 
   async #assignStatusTodo(project, item) {
@@ -233,6 +210,28 @@ class RepositoryProjectsManager {
         }
       }`);
     return repository;
+  }
+
+  // requires GitHub App installation token with read and write
+  // permissions for projects v2 and pull requests
+  async #assignPRtoProject(pullRequestId, project, clientMutationId) {
+    const { addProjectV2ItemById: { item } } = await this.octokit.graphql(`
+      mutation {
+        addProjectV2ItemById(
+          input: {
+            clientMutationId: "${clientMutationId}",
+            contentId: "${pullRequestId}",
+            projectId: "${project.id}",
+          }
+        )
+        {
+          item {
+            id
+          }
+        }
+      }`);
+
+    return item;
   }
 }
 
