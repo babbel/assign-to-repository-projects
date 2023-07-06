@@ -19,7 +19,10 @@ class RepositoryProjectsManager {
   async #init() {
     this.organization = this.#fetchOrganization({ owner: this.owner });
 
-    const repository = await this.#fetchRepositoryAndProjects({ owner: this.owner, repositoryName: this.repositoryName });
+    const repository = await this.#fetchRepositoryAndProjects({
+      owner: this.owner,
+      repositoryName: this.repositoryName,
+    });
 
     this.repository = repository;
     this.projects = repository.projectsV2.nodes;
