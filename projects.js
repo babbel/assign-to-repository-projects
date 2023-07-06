@@ -1,13 +1,17 @@
 class RepositoryProjectsManager {
   #apiWrapper;
 
+  #clientMutationId;
+
   #owner;
+
+  #repositoryName;
 
   constructor({ owner, repository, apiWrapper }) {
     this.#apiWrapper = apiWrapper;
     this.#owner = owner;
     this.#repositoryName = repository;
-    this.clientMutationId = `assign-to-repository-projects-${owner}-${repository}`;
+    this.#clientMutationId = `assign-to-repository-projects-${owner}-${repository}`;
   }
 
   async assign(pullRequestId, titles) {
@@ -44,7 +48,7 @@ class RepositoryProjectsManager {
       const item = await this.#apiWrapper.assignPRtoProject({
         project,
         pullRequestId,
-        clientMutationId: this.clientMutationId,
+        clientMutationId: this.#clientMutationId,
       });
 
       // at creation, items can only be assigned to projecs but initially
@@ -67,7 +71,7 @@ class RepositoryProjectsManager {
       item,
       statusField,
       todoOption,
-      clientMutationId: this.clientMutationId,
+      clientMutationId: this.#clientMutationId,
     });
   }
 
@@ -81,7 +85,7 @@ class RepositoryProjectsManager {
       await this.#apiWrapper.deleteProjectItem({
         project,
         item,
-        clientMutationId: this.clientMutationId,
+        clientMutationId: this.#clientMutationId,
       });
     }
   }
