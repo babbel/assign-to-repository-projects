@@ -17,15 +17,6 @@ const rpm = new RepositoryProjectsManager({
 
 const nockHTTPRequestsForAssigningSinglePR = () => {
   nock('https://api.github.com')
-    .post('/graphql', (body) => /.*organization.login:.*/.test(body.query))
-    .reply(200, {
-      data: {
-        organization: {
-          id: 'O_0000000001',
-          name: 'Acme Corporation',
-        },
-      },
-    })
     .post('/graphql', (body) => /projectsV2.first:/.test(body.query))
     .reply(
       200,
@@ -146,15 +137,6 @@ const nockHTTPRequestsForAssigningSinglePR = () => {
 
 const nockHTTPRequestsForAlreadyAssignedProject = () => {
   nock('https://api.github.com')
-    .post('/graphql', (body) => /.*organization.login:.*/.test(body.query))
-    .reply(200, {
-      data: {
-        organization: {
-          id: 'O_0000000001',
-          name: 'Acme Corporation',
-        },
-      },
-    })
     .post('/graphql', (body) => /projectsV2.first:/.test(body.query))
     .reply(
       200,
@@ -282,15 +264,6 @@ const nockHTTPRequestsForAlreadyAssignedProject = () => {
 
 const nockHTTPRequestsForUnassigning = () => {
   nock('https://api.github.com')
-    .post('/graphql', (body) => /.*organization.login:.*/.test(body.query))
-    .reply(200, {
-      data: {
-        organization: {
-          id: 'O_0000000001',
-          name: 'Acme Corporation',
-        },
-      },
-    })
     .post('/graphql', (body) => /projectsV2.first:/.test(body.query))
     .reply(
       200,
