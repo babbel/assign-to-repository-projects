@@ -8,9 +8,9 @@ class RepositoryProjectsManager {
   #repositoryName;
 
   constructor({ ownerName, repositoryName, apiWrapper }) {
-    this.#apiWrapper = apiWrapper;
     this.#ownerName = ownerName;
     this.#repositoryName = repositoryName;
+    this.#apiWrapper = apiWrapper;
 
     this.#clientMutationId = `assign-to-repository-projects-${ownerName}-${repositoryName}`;
   }
