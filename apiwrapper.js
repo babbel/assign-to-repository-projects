@@ -6,7 +6,7 @@ class ApiWrapper {
   }
 
   async fetchAssignedProjects({ pullRequestId }) {
-    const { node: { projectsV2: { nodes } } } = await this.octokit.graphql.paginate(`
+    const { node: { projectsV2: { nodes } } } = await this.#octokit.graphql.paginate(`
       query paginate($cursor: String) {
         node(id:"${pullRequestId}") {
           ... on PullRequest {
@@ -31,7 +31,7 @@ class ApiWrapper {
   // we need to know the item id of a PR in the project.
   // we know this item exists
   async fetchItemForPRId({ project, pullRequestId }) {
-    const { node: { items: { nodes } } } = await this.octokit.graphql.paginate(`
+    const { node: { items: { nodes } } } = await this.#octokit.graphql.paginate(`
       query paginate($cursor: String) {
         node(id:"${project.id}") {
           ... on ProjectV2 {
@@ -60,7 +60,7 @@ class ApiWrapper {
   // requires GitHub App installation token with read and write
   // permissions for projects v2 and pull requests
   async deleteProjectItem({ project, item, clientMutationId }) {
-    const { deleteProjectV2Item: deletedItemId } = await this.octokit.graphql(`
+    const { deleteProjectV2Item: deletedItemId } = await this.#octokit.graphql(`
       mutation {
         deleteProjectV2Item(
           input: {
@@ -81,7 +81,7 @@ class ApiWrapper {
   // this produces deprecation warnings. as a workaround, look up the "new" ID.
   // https://github.blog/changelog/label/deprecation/
   async fetchOrganization({ owner }) {
-    const { organization } = await this.octokit.graphql(
+    const { organization } = await this.#octokit.graphql(
       `query {
          organization(login: "${owner}") {
            id
@@ -99,7 +99,7 @@ class ApiWrapper {
   }
 
   async fetchRepositoryAndProjects({ owner, repositoryName }) {
-    const { repository } = await this.octokit.graphql.paginate(`
+    const { repository } = await this.#octokit.graphql.paginate(`
       query paginate($cursor: String) {
         repository(owner: "${owner}", name: "${repositoryName}") {
           name
@@ -135,7 +135,7 @@ class ApiWrapper {
   // requires GitHub App installation token with read and write
   // permissions for projects v2 and pull requests
   async assignPRtoProject({ pullRequestId, project, clientMutationId }) {
-    const { addProjectV2ItemById: { item } } = await this.octokit.graphql(`
+    const { addProjectV2ItemById: { item } } = await this.#octokit.graphql(`
       mutation {
         addProjectV2ItemById(
           input: {
@@ -158,7 +158,7 @@ class ApiWrapper {
     clientMutationId, project, item, statusField, todoOption,
   }) {
     // https://docs.github.com/en/graphql/reference/mutations#updateprojectv2itemfieldvalue
-    const result = await this.octokit.graphql(`
+    const result = await this.#octokit.graphql(`
       mutation {
         updateProjectV2ItemFieldValue(
           input: {
