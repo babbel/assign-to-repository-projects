@@ -21,7 +21,8 @@ class RepositoryProjectsManager {
 
     const repository = await this.#fetchRepositoryAndProjects({ owner: this.owner, repositoryName: this.repositoryName });
 
-    await this.#fetchRepositoryAndProjects();
+    this.repository = repository;
+    this.projects = repository.projectsV2.nodes;
   }
 
   async #assignPRToProjects(pullRequestId, titles, assignedProjects) {
@@ -45,40 +46,6 @@ class RepositoryProjectsManager {
     }
   }
 
-  async #fetchRepositoryAndProjects() {
-    const response = await this.octokit.graphql.paginate(`
-      query paginate($cursor: String) {
-        repository(owner: "${this.owner}", name: "${this.repositoryName}") {
-          name
-          id
-          projectsV2(first: 100, after: $cursor) {
-            nodes {
-              id
-              title
-              number
-              fields(first: 5) {
-                nodes {
-                  ... on ProjectV2SingleSelectField {
-                    id
-                    name
-                    options {
-                      id
-                      name
-                    }
-                  }
-                }
-              }
-            }
-            pageInfo {
-              hasNextPage
-              endCursor
-            }
-          }
-        }
-      }`);
-    this.repository = response.repository;
-    this.projects = response.repository.projectsV2.nodes;
-  }
 
   // requires GitHub App installation token with read and write
   // permissions for projects v2 and pull requests
@@ -232,6 +199,40 @@ class RepositoryProjectsManager {
     );
 
     return organization;
+  }
+
+  async #fetchRepositoryAndProjects({ owner, repositoryName }) {
+    const { repository } = await this.octokit.graphql.paginate(`
+      query paginate($cursor: String) {
+        repository(owner: "${owner}", name: "${repositoryName}") {
+          name
+          id
+          projectsV2(first: 100, after: $cursor) {
+            nodes {
+              id
+              title
+              number
+              fields(first: 5) {
+                nodes {
+                  ... on ProjectV2SingleSelectField {
+                    id
+                    name
+                    options {
+                      id
+                      name
+                    }
+                  }
+                }
+              }
+            }
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+          }
+        }
+      }`);
+    return repository;
   }
 }
 
