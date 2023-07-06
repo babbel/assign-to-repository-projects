@@ -4,6 +4,7 @@ import github from '@actions/github';
 import { Octokit } from '@octokit/core';
 import { paginateGraphql } from '@octokit/plugin-paginate-graphql';
 
+import { ApiWrapper } from './apiwrapper.js'; // eslint-disable-line import/extensions
 import { RepositoryProjectsManager } from './projects.js'; // eslint-disable-line import/extensions
 
 const GraphQlOctokit = Octokit.plugin(paginateGraphql);
@@ -12,6 +13,7 @@ const GraphQlOctokit = Octokit.plugin(paginateGraphql);
 // example: https://github.com/octokit/graphql.js/issues/61#issuecomment-542399763
 // for token type installation, pass only the token
 const octokit = new GraphQlOctokit({ auth: process.env.GITHUB_TOKEN });
+const apiWrapper = new ApiWrapper({ octokit });
 
 try {
   const titlesInput = core.getInput('project-titles');
@@ -30,9 +32,9 @@ try {
   } = github;
 
   const rpm = new RepositoryProjectsManager({
+    apiWrapper,
     owner: repository.owner.login,
     repository: repository.name,
-    octokit,
   });
 
   const assignedProjectTitles = await rpm.assign(node_id, titles);

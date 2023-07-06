@@ -2,15 +2,17 @@ import nock from 'nock'; // https://github.com/nock/nock
 
 import { Octokit } from '@octokit/core';
 import { paginateGraphql } from '@octokit/plugin-paginate-graphql';
+import { ApiWrapper } from '../apiwrapper.js'; // eslint-disable-line import/extensions
 import { RepositoryProjectsManager } from '../projects.js'; // eslint-disable-line import/extensions
 
 const GraphQlOctokit = Octokit.plugin(paginateGraphql);
 const octokit = new GraphQlOctokit({ auth: 'fake-token-value' }); // don't use default GITHUB_TOKEN token from env
+const apiWrapper = new ApiWrapper({ octokit });
 
 const rpm = new RepositoryProjectsManager({
+  apiWrapper,
   owner: 'acme',
   repository: 'example-repository',
-  octokit,
 });
 
 const nockHTTPRequestsForAssigningSinglePR = () => {
