@@ -69,7 +69,7 @@ class RepositoryProjectsManager {
 
     for await (const project of projects) {
       // async, because more than 5 breaks API endpoint
-      const item = await this.#itemFor(project, pullRequestId);
+      const item = await this.#fetchItemForPRId({ project, pullRequestId });
       await this.#deleteProjectItem(project, item);
     }
   }
@@ -99,7 +99,7 @@ class RepositoryProjectsManager {
 
   // we need to know the item id of a PR in the project.
   // we know this item exists
-  async #itemFor(project, pullRequestId) {
+  async #fetchItemForPRId({ project, pullRequestId }) {
     const { node: { items: { nodes } } } = await this.octokit.graphql.paginate(`
       query paginate($cursor: String) {
         node(id:"${project.id}") {
