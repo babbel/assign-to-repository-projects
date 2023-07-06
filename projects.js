@@ -51,27 +51,13 @@ class RepositoryProjectsManager {
     const statusField = project.fields.nodes.find((n) => Object.keys(n) !== 0 && n.name === 'Status');
     const todoOption = statusField.options.find((o) => o.name === 'Todo');
 
-    // https://docs.github.com/en/graphql/reference/mutations#updateprojectv2itemfieldvalue
-    const result = await this.octokit.graphql(`
-      mutation {
-        updateProjectV2ItemFieldValue(
-          input: {
-            clientMutationId: "${this.clientMutationId}",
-            projectId: "${project.id}",
-            fieldId: "${statusField.id}",
-            itemId: "${item.id}",
-            value: {
-              singleSelectOptionId: "${todoOption.id}"
-            }
-          }
-        ){
-           projectV2Item {
-             id
-           }
-         }
-      }`);
-
-    return result;
+    return this.#updateItemFieldValue({
+      project,
+      item,
+      statusField,
+      todoOption,
+      clientMutationId: this.clientMutationId,
+    });
   }
 
   // unassign PR from projects that are not listed by titles
@@ -232,6 +218,32 @@ class RepositoryProjectsManager {
       }`);
 
     return item;
+  }
+
+  async #updateItemFieldValue({
+    clientMutationId, project, item, statusField, todoOption,
+  }) {
+    // https://docs.github.com/en/graphql/reference/mutations#updateprojectv2itemfieldvalue
+    const result = await this.octokit.graphql(`
+      mutation {
+        updateProjectV2ItemFieldValue(
+          input: {
+            clientMutationId: "${clientMutationId}",
+            projectId: "${project.id}",
+            fieldId: "${statusField.id}",
+            itemId: "${item.id}",
+            value: {
+              singleSelectOptionId: "${todoOption.id}"
+            }
+          }
+        ){
+           projectV2Item {
+             id
+           }
+         }
+      }`);
+
+    return result;
   }
 }
 
