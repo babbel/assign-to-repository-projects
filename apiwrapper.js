@@ -77,27 +77,6 @@ class ApiWrapper {
     return deletedItemId;
   }
 
-  // the GitHub Action's event may only contain the "old" GraphQL node id.
-  // this produces deprecation warnings. as a workaround, look up the "new" ID.
-  // https://github.blog/changelog/label/deprecation/
-  async fetchOrganization({ owner }) {
-    const { organization } = await this.#octokit.graphql(
-      `query {
-         organization(login: "${owner}") {
-           id
-           name
-         }
-      }`,
-      {
-        headers: {
-          'X-Github-Next-Global-ID': '1',
-        },
-      },
-    );
-
-    return organization;
-  }
-
   async fetchRepositoryAndProjects({ owner, repositoryName }) {
     const { repository } = await this.#octokit.graphql.paginate(`
       query paginate($cursor: String) {
