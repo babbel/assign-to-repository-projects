@@ -9,11 +9,11 @@ class RepositoryProjectsManager {
   async assign(pullRequestId, titles) {
     await this.#init();
 
-    const assignedProjects = await this.#assignedProjects(pullRequestId);
+    const assignedProjects = await this.#fetchAssignedProjects({ pullRequestId });
     await this.#assignPRToProjects(pullRequestId, titles, assignedProjects);
     await this.#unassignPRFromProjects(pullRequestId, titles, assignedProjects);
 
-    return this.#assignedProjects(pullRequestId);
+    return this.#fetchAssignedProjects({ pullRequestId });
   }
 
   async #init() {
@@ -74,7 +74,7 @@ class RepositoryProjectsManager {
     }
   }
 
-  async #assignedProjects(pullRequestId) {
+  async #fetchAssignedProjects({ pullRequestId }) {
     const { node: { projectsV2: { nodes } } } = await this.octokit.graphql.paginate(`
       query paginate($cursor: String) {
         node(id:"${pullRequestId}") {
