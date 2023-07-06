@@ -31,7 +31,6 @@ class RepositoryProjectsManager {
       repositoryName: this.#repositoryName,
     });
 
-    this.repository = repository;
     this.projects = repository.projectsV2.nodes;
   }
 
