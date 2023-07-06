@@ -1,9 +1,11 @@
 class RepositoryProjectsManager {
   #apiWrapper;
 
+  #owner;
+
   constructor({ owner, repository, apiWrapper }) {
     this.#apiWrapper = apiWrapper;
-    this.owner = owner;
+    this.#owner = owner;
     this.repositoryName = repository;
     this.clientMutationId = `assign-to-repository-projects-${owner}-${repository}`;
   }
@@ -19,10 +21,10 @@ class RepositoryProjectsManager {
   }
 
   async #init() {
-    this.organization = this.#apiWrapper.fetchOrganization({ owner: this.owner });
+    this.organization = this.#apiWrapper.fetchOrganization({ owner: this.#owner });
 
     const repository = await this.#apiWrapper.fetchRepositoryAndProjects({
-      owner: this.owner,
+      owner: this.#owner,
       repositoryName: this.repositoryName,
     });
 
