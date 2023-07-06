@@ -37,7 +37,11 @@ class RepositoryProjectsManager {
 
     for await (const project of projects) {
       // async, because more than 5 breaks API endpoint
-      const item = await this.#assignPRtoProject(pullRequestId, project, this.clientMutationId);
+      const item = await this.#assignPRtoProject({
+        project,
+        pullRequestId,
+        clientMutationId: this.clientMutationId
+      });
 
       // at creation, items can only be assigned to projecs but initially
       // have Status value null.
@@ -203,7 +207,7 @@ class RepositoryProjectsManager {
 
   // requires GitHub App installation token with read and write
   // permissions for projects v2 and pull requests
-  async #assignPRtoProject(pullRequestId, project, clientMutationId) {
+  async #assignPRtoProject({ pullRequestId, project, clientMutationId }) {
     const { addProjectV2ItemById: { item } } = await this.octokit.graphql(`
       mutation {
         addProjectV2ItemById(
