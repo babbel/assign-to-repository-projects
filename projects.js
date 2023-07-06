@@ -74,7 +74,11 @@ class RepositoryProjectsManager {
     for await (const project of projects) {
       // async, because more than 5 breaks API endpoint
       const item = await this.apiWrapper.fetchItemForPRId({ project, pullRequestId });
-      await this.apiWrapper.deleteProjectItem({ project, item, clientMutationId: this.clientMutationId });
+      await this.apiWrapper.deleteProjectItem({
+        project,
+        item,
+        clientMutationId: this.clientMutationId,
+      });
     }
   }
 }
