@@ -1,6 +1,8 @@
 class RepositoryProjectsManager {
+  #apiWrapper;
+
   constructor({ owner, repository, apiWrapper }) {
-    this.apiWrapper = apiWrapper;
+    this.#apiWrapper = apiWrapper;
     this.owner = owner;
     this.repositoryName = repository;
     this.clientMutationId = `assign-to-repository-projects-${owner}-${repository}`;
@@ -9,17 +11,17 @@ class RepositoryProjectsManager {
   async assign(pullRequestId, titles) {
     await this.#init();
 
-    const assignedProjects = await this.apiWrapper.fetchAssignedProjects({ pullRequestId });
+    const assignedProjects = await this.#apiWrapper.fetchAssignedProjects({ pullRequestId });
     await this.#assignPRToProjects(pullRequestId, titles, assignedProjects);
     await this.#unassignPRFromProjects(pullRequestId, titles, assignedProjects);
 
-    return this.apiWrapper.fetchAssignedProjects({ pullRequestId });
+    return this.#apiWrapper.fetchAssignedProjects({ pullRequestId });
   }
 
   async #init() {
-    this.organization = this.apiWrapper.fetchOrganization({ owner: this.owner });
+    this.organization = this.#apiWrapper.fetchOrganization({ owner: this.owner });
 
-    const repository = await this.apiWrapper.fetchRepositoryAndProjects({
+    const repository = await this.#apiWrapper.fetchRepositoryAndProjects({
       owner: this.owner,
       repositoryName: this.repositoryName,
     });
@@ -37,7 +39,7 @@ class RepositoryProjectsManager {
 
     for await (const project of projects) {
       // async, because more than 5 breaks API endpoint
-      const item = await this.apiWrapper.assignPRtoProject({
+      const item = await this.#apiWrapper.assignPRtoProject({
         project,
         pullRequestId,
         clientMutationId: this.clientMutationId,
@@ -58,7 +60,7 @@ class RepositoryProjectsManager {
     const statusField = project.fields.nodes.find((n) => Object.keys(n) !== 0 && n.name === 'Status');
     const todoOption = statusField.options.find((o) => o.name === 'Todo');
 
-    return this.apiWrapper.updateItemFieldValue({
+    return this.#apiWrapper.updateItemFieldValue({
       project,
       item,
       statusField,
@@ -73,8 +75,8 @@ class RepositoryProjectsManager {
 
     for await (const project of projects) {
       // async, because more than 5 breaks API endpoint
-      const item = await this.apiWrapper.fetchItemForPRId({ project, pullRequestId });
-      await this.apiWrapper.deleteProjectItem({
+      const item = await this.#apiWrapper.fetchItemForPRId({ project, pullRequestId });
+      await this.#apiWrapper.deleteProjectItem({
         project,
         item,
         clientMutationId: this.clientMutationId,
