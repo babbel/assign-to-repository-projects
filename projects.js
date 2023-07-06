@@ -5,6 +5,8 @@ class RepositoryProjectsManager {
 
   #ownerName;
 
+  #projects;
+
   #repositoryName;
 
   constructor({ ownerName, repositoryName, apiWrapper }) {
@@ -31,13 +33,13 @@ class RepositoryProjectsManager {
       repositoryName: this.#repositoryName,
     });
 
-    this.projects = repository.projectsV2.nodes;
+    this.#projects = repository.projectsV2.nodes;
   }
 
   async #assignPRToProjects(pullRequestId, titles, assignedProjects) {
     const assignedTitles = assignedProjects.map((p) => p.title);
 
-    const projects = this.projects
+    const projects = this.#projects
       .filter((p) => titles.includes(p.title))
       .filter((p) => !assignedTitles.includes(p.title));
 
