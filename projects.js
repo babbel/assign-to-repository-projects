@@ -74,7 +74,7 @@ class RepositoryProjectsManager {
     for await (const project of projects) {
       // async, because more than 5 breaks API endpoint
       const item = await this.#fetchItemForPRId({ project, pullRequestId });
-      await this.#deleteProjectItem(project, item);
+      await this.#deleteProjectItem({ project, item, clientMutationId: this.clientMutationId } );
     }
   }
 
@@ -132,12 +132,12 @@ class RepositoryProjectsManager {
 
   // requires GitHub App installation token with read and write
   // permissions for projects v2 and pull requests
-  async #deleteProjectItem(project, item) {
+  async #deleteProjectItem({ project, item, clientMutationId }) {
     const { deleteProjectV2Item: deletedItemId } = await this.octokit.graphql(`
       mutation {
         deleteProjectV2Item(
           input: {
-            clientMutationId: "${this.clientMutationId}",
+            clientMutationId: "${clientMutationId}",
             itemId: "${item.id}",
             projectId: "${project.id}",
           }
