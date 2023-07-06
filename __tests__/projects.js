@@ -11,8 +11,8 @@ const apiWrapper = new ApiWrapper({ octokit });
 
 const rpm = new RepositoryProjectsManager({
   apiWrapper,
-  owner: 'acme',
-  repository: 'example-repository',
+  ownerName: 'acme',
+  repositoryName: 'example-repository',
 });
 
 const nockHTTPRequestsForAssigningSinglePR = () => {

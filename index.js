@@ -33,8 +33,8 @@ try {
 
   const rpm = new RepositoryProjectsManager({
     apiWrapper,
-    owner: repository.owner.login,
-    repository: repository.name,
+    ownerName: repository.owner.login,
+    repositoryName: repository.name,
   });
 
   const assignedProjectTitles = await rpm.assign(node_id, titles);

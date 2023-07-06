@@ -3,16 +3,16 @@ class RepositoryProjectsManager {
 
   #clientMutationId;
 
-  #owner;
+  #ownerName;
 
   #repositoryName;
 
-  constructor({ owner, repository, apiWrapper }) {
+  constructor({ ownerName, repositoryName, apiWrapper }) {
     this.#apiWrapper = apiWrapper;
-    this.#owner = owner;
-    this.#repositoryName = repository;
+    this.#ownerName = ownerName;
+    this.#repositoryName = repositoryName;
 
-    this.#clientMutationId = `assign-to-repository-projects-${owner}-${repository}`;
+    this.#clientMutationId = `assign-to-repository-projects-${ownerName}-${repositoryName}`;
   }
 
   async assign(pullRequestId, titles) {
@@ -27,7 +27,7 @@ class RepositoryProjectsManager {
 
   async #init() {
     const repository = await this.#apiWrapper.fetchRepositoryAndProjects({
-      owner: this.#owner,
+      owner: this.#ownerName,
       repositoryName: this.#repositoryName,
     });
 
