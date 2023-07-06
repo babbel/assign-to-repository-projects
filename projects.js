@@ -17,23 +17,9 @@ class RepositoryProjectsManager {
   }
 
   async #init() {
-    // the GitHub Action's event may only contain the "old" GraphQL node id.
-    // this produces deprecation warnings. as a workaround, look up the "new" ID.
-    // https://github.blog/changelog/label/deprecation/
-    const { organization } = await this.octokit.graphql(
-      `query {
-         organization(login: "${this.owner}") {
-           id
-           name
-         }
-      }`,
-      {
-        headers: {
-          'X-Github-Next-Global-ID': '1',
-        },
-      },
-    );
-    this.organization = organization;
+    this.organization = this.#fetchOrganization({ owner: this.owner });
+
+    const repository = await this.#fetchRepositoryAndProjects({ owner: this.owner, repositoryName: this.repositoryName });
 
     await this.#fetchRepositoryAndProjects();
   }
@@ -225,6 +211,27 @@ class RepositoryProjectsManager {
       }`);
 
     return deletedItemId;
+  }
+
+  // the GitHub Action's event may only contain the "old" GraphQL node id.
+  // this produces deprecation warnings. as a workaround, look up the "new" ID.
+  // https://github.blog/changelog/label/deprecation/
+  async #fetchOrganization({ owner }) {
+    const { organization } = await this.octokit.graphql(
+      `query {
+         organization(login: "${owner}") {
+           id
+           name
+         }
+      }`,
+      {
+        headers: {
+          'X-Github-Next-Global-ID': '1',
+        },
+      },
+    );
+
+    return organization;
   }
 }
 
