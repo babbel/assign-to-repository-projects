@@ -25,4 +25,41 @@ describe('ApiWrapper', () => {
     fetchMock.reset();
   });
 
+  describe('.fetchRepositoryAndProjects()', () => {
+    const data = {
+      repository: {
+        name: 'example-repository',
+        id: 'R_0000000001',
+        projectsV2: {
+          nodes: [
+            {
+              id: 'PVT_kwDOAnsQgs4AP9Qq',
+              title: 'layer-200/module-1',
+            },
+            {
+              id: 'PVT_000000000000002',
+              title: 'layer-100/module-2',
+            },
+          ],
+          pageInfo: {
+            hasNextPage: false,
+            endCursor: 'Nw',
+          },
+        },
+      },
+    };
+
+    const input = {
+      owner: 'acme',
+      repositoryName: 'example-repository-name',
+    };
+
+    beforeEach(() => { mockResponse('fetchRepositoryAndProjects', data); });
+    afterEach(() => { fetchMock.reset(); });
+
+    test('returns object containing id', async () => {
+      const repository = await apiWrapper.fetchRepositoryAndProjects(input);
+      expect({ repository }).toEqual(data); // checks deep
+    });
+  });
 });
