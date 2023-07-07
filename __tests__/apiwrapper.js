@@ -25,6 +25,38 @@ describe('ApiWrapper', () => {
     fetchMock.reset();
   });
 
+  describe('.fetchAssignedProjects()', () => {
+    const data = {
+      node: {
+        number: 74,
+        projectsV2: {
+          nodes: [
+            {
+              id: 'PVT_0000000000000001',
+              title: 'layer-100/bar',
+            },
+          ],
+          pageInfo: {
+            hasNextPage: false,
+            endCursor: 'MQ',
+          },
+        },
+      },
+    };
+
+    const input = {
+      pullRequestId: 'PVT_0000000000000001',
+    };
+
+    beforeEach(() => { mockResponse('fetchAssignedProjects', data); });
+    afterEach(() => { fetchMock.reset(); });
+
+    test('returns object containing id', async () => {
+      const nodes = await apiWrapper.fetchAssignedProjects(input);
+      expect(nodes).toEqual(data.node.projectsV2.nodes); // checks deep
+    });
+  });
+
   describe('.fetchRepositoryAndProjects()', () => {
     const data = {
       repository: {

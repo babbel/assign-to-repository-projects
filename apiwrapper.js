@@ -77,6 +77,7 @@ class ApiWrapper {
     return deletedItemId;
   }
 
+  // done
   async fetchRepositoryAndProjects({ owner, repositoryName }) {
     const { repository } = await this.#octokit.graphql.paginate(`
       query paginate($cursor: String) {
