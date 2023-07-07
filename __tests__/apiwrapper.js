@@ -94,6 +94,28 @@ describe('ApiWrapper', () => {
     });
   });
 
+  describe('.deleteProjectItem()', () => {
+    const data = {
+      deleteProjectV2Item: {
+        deletedItemId: 'PVTI_00000000000000000000000',
+      },
+    };
+
+    const input = {
+      project: { id: 'PVT_000000000000001' },
+      item: { id: 'PVTI_00000000000000000000000' },
+      clientMutationId: 'foo',
+    };
+
+    beforeEach(() => { mockResponse('deleteProjectItem', data); });
+    afterEach(() => { fetchMock.reset(); });
+
+    test('returns id of delted item', async () => {
+      const id = await apiWrapper.deleteProjectItem(input);
+      expect(id).toEqual(data.deleteProjectV2Item); // checks deep
+    });
+  });
+
   describe('.fetchRepositoryAndProjects()', () => {
     const data = {
       repository: {
