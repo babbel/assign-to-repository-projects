@@ -5,6 +5,7 @@ class ApiWrapper {
     this.#octokit = octokit;
   }
 
+  // done
   async fetchAssignedProjects({ pullRequestId }) {
     const { node: { projectsV2: { nodes } } } = await this.#octokit.graphql.paginate(`
       query paginate($cursor: String) {

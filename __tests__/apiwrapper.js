@@ -49,9 +49,10 @@ describe('ApiWrapper', () => {
     };
 
     beforeEach(() => { mockResponse('fetchAssignedProjects', data); });
+
     afterEach(() => { fetchMock.reset(); });
 
-    test('returns object containing id', async () => {
+    test('returns nodes', async () => {
       const nodes = await apiWrapper.fetchAssignedProjects(input);
       expect(nodes).toEqual(data.node.projectsV2.nodes); // checks deep
     });
