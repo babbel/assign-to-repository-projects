@@ -153,4 +153,28 @@ describe('ApiWrapper', () => {
       expect({ repository }).toEqual(data); // checks deep
     });
   });
+
+  describe('.assignPRtoProject()', () => {
+    const data = {
+      addProjectV2ItemById: {
+        item: {
+          id: 'PVTI_0000000000000001',
+        },
+      },
+    };
+
+    const input = {
+      pullRequestId: 'PR_0000000000000001',
+      project: { id: 'PVT_0000000000000001' },
+      clientMutationId: 'foo',
+    };
+
+    beforeEach(() => { mockResponse('assignPRtoProject', data); });
+    afterEach(() => { fetchMock.reset(); });
+
+    test('returns object containing proect item', async () => {
+      const item = await apiWrapper.assignPRtoProject(input);
+      expect({ item }).toEqual(data.addProjectV2ItemById); // checks deep
+    });
+  });
 });
