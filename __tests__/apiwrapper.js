@@ -177,4 +177,26 @@ describe('ApiWrapper', () => {
       expect({ item }).toEqual(data.addProjectV2ItemById); // checks deep
     });
   });
+
+  describe('.updateItemFieldValue()', () => {
+    const data = {
+      updateProjectV2ItemFieldValue: { projectV2Item: { id: 'PVTI_0000000000000001' } },
+    };
+
+    const input = {
+      project: { id: 'PVT_0000000000000001' },
+      item: { id: 'PVTI_0000000000000001' },
+      statusField: { id: 'PVSF_0000000000000001' },
+      todoOption: { id: 'PVSFO_0000000000000001' },
+      clientMutationId: 'foo',
+    };
+
+    beforeEach(() => { mockResponse('updateItemFieldValue', data); });
+    afterEach(() => { fetchMock.reset(); });
+
+    test('returns updated field value item', async () => {
+      const result = await apiWrapper.updateItemFieldValue(input);
+      expect(result).toEqual(data); // checks deep
+    });
+  });
 });
