@@ -58,6 +58,42 @@ describe('ApiWrapper', () => {
     });
   });
 
+  // async fetchItemForPRId({ project, pullRequestId }) {
+  describe('.fetchItemForPRId()', () => {
+    const data = {
+      node: {
+        number: 1099,
+        items: {
+          nodes: [
+            {
+              id: 'PVTI_00000000000000000000001',
+              content: {
+                id: 'PR_0000000000000001',
+              },
+            },
+          ],
+          pageInfo: {
+            hasNextPage: false,
+            endCursor: 'MQ',
+          },
+        },
+      },
+    };
+
+    const input = {
+      project: { id: 'PVT_000000000000001' },
+      pullRequestId: 'PR_0000000000000001',
+    };
+
+    beforeEach(() => { mockResponse('fetchItemForPRId', data); });
+    afterEach(() => { fetchMock.reset(); });
+
+    test('returns project v2 item node', async () => {
+      const node = await apiWrapper.fetchItemForPRId(input);
+      expect(node).toEqual(data.node.items.nodes[0]); // checks deep
+    });
+  });
+
   describe('.fetchRepositoryAndProjects()', () => {
     const data = {
       repository: {
