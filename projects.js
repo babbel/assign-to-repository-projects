@@ -1,53 +1,55 @@
 class RepositoryProjectsManager {
-  constructor({ owner, repository, octokit }) {
-    this.owner = owner;
-    this.repositoryName = repository;
-    this.octokit = octokit;
-    this.clientMutationId = `assign-to-repository-projects-${owner}-${repository}`;
+  #apiWrapper;
+
+  #clientMutationId;
+
+  #ownerName;
+
+  #projects;
+
+  #repositoryName;
+
+  constructor({ ownerName, repositoryName, apiWrapper }) {
+    this.#ownerName = ownerName;
+    this.#repositoryName = repositoryName;
+    this.#apiWrapper = apiWrapper;
+
+    this.#clientMutationId = `assign-to-repository-projects-${ownerName}-${repositoryName}`;
   }
 
   async assign(pullRequestId, titles) {
     await this.#init();
 
-    const assignedProjects = await this.#assignedProjects(pullRequestId);
+    const assignedProjects = await this.#apiWrapper.fetchAssignedProjects({ pullRequestId });
     await this.#assignPRToProjects(pullRequestId, titles, assignedProjects);
     await this.#unassignPRFromProjects(pullRequestId, titles, assignedProjects);
 
-    return this.#assignedProjects(pullRequestId);
+    return this.#apiWrapper.fetchAssignedProjects({ pullRequestId });
   }
 
   async #init() {
-    // the GitHub Action's event may only contain the "old" GraphQL node id.
-    // this produces deprecation warnings. as a workaround, look up the "new" ID.
-    // https://github.blog/changelog/label/deprecation/
-    const { organization } = await this.octokit.graphql(
-      `query {
-         organization(login: "${this.owner}") {
-           id
-           name
-         }
-      }`,
-      {
-        headers: {
-          'X-Github-Next-Global-ID': '1',
-        },
-      },
-    );
-    this.organization = organization;
+    const repository = await this.#apiWrapper.fetchRepositoryAndProjects({
+      owner: this.#ownerName,
+      repositoryName: this.#repositoryName,
+    });
 
-    await this.#fetchRepositoryAndProjects();
+    this.#projects = repository.projectsV2.nodes;
   }
 
   async #assignPRToProjects(pullRequestId, titles, assignedProjects) {
     const assignedTitles = assignedProjects.map((p) => p.title);
 
-    const projects = this.projects
+    const projects = this.#projects
       .filter((p) => titles.includes(p.title))
       .filter((p) => !assignedTitles.includes(p.title));
 
     for await (const project of projects) {
       // async, because more than 5 breaks API endpoint
-      const item = await this.#assignPRtoProject(pullRequestId, project);
+      const item = await this.#apiWrapper.assignPRtoProject({
+        project,
+        pullRequestId,
+        clientMutationId: this.#clientMutationId,
+      });
 
       // at creation, items can only be assigned to projecs but initially
       // have Status value null.
@@ -59,89 +61,18 @@ class RepositoryProjectsManager {
     }
   }
 
-  async #fetchRepositoryAndProjects() {
-    const response = await this.octokit.graphql.paginate(`
-      query paginate($cursor: String) {
-        repository(owner: "${this.owner}", name: "${this.repositoryName}") {
-          name
-          id
-          projectsV2(first: 100, after: $cursor) {
-            nodes {
-              id
-              title
-              number
-              fields(first: 5) {
-                nodes {
-                  ... on ProjectV2SingleSelectField {
-                    id
-                    name
-                    options {
-                      id
-                      name
-                    }
-                  }
-                }
-              }
-            }
-            pageInfo {
-              hasNextPage
-              endCursor
-            }
-          }
-        }
-      }`);
-    this.repository = response.repository;
-    this.projects = response.repository.projectsV2.nodes;
-  }
-
-  // requires GitHub App installation token with read and write
-  // permissions for projects v2 and pull requests
-  async #assignPRtoProject(pullRequestId, project) {
-    const { addProjectV2ItemById: { item } } = await this.octokit.graphql(`
-      mutation {
-        addProjectV2ItemById(
-          input: {
-            clientMutationId: "${this.clientMutationId}",
-            contentId: "${pullRequestId}",
-            projectId: "${project.id}",
-          }
-        )
-        {
-          item {
-            id
-          }
-        }
-      }`);
-
-    return item;
-  }
-
   async #assignStatusTodo(project, item) {
     // the `Status` field and  `Todo` option are generated with each Project V2 by default.
     const statusField = project.fields.nodes.find((n) => Object.keys(n) !== 0 && n.name === 'Status');
     const todoOption = statusField.options.find((o) => o.name === 'Todo');
 
-    // https://docs.github.com/en/graphql/reference/mutations#updateprojectv2itemfieldvalue
-    const result = await this.octokit.graphql(`
-      mutation {
-        updateProjectV2ItemFieldValue(
-          input: {
-            clientMutationId: "${this.clientMutationId}",
-            projectId: "${project.id}",
-            fieldId: "${statusField.id}",
-            itemId: "${item.id}",
-            value: {
-              singleSelectOptionId: "${todoOption.id}"
-            }
-          }
-        ){
-           projectV2Item {
-             id
-           }
-         }
-      }`);
-
-    return result;
+    return this.#apiWrapper.updateItemFieldValue({
+      project,
+      item,
+      statusField,
+      todoOption,
+      clientMutationId: this.#clientMutationId,
+    });
   }
 
   // unassign PR from projects that are not listed by titles
@@ -150,81 +81,13 @@ class RepositoryProjectsManager {
 
     for await (const project of projects) {
       // async, because more than 5 breaks API endpoint
-      const item = await this.#itemFor(project, pullRequestId);
-      await this.#deleteProjectItem(project, item);
+      const item = await this.#apiWrapper.fetchItemForPRId({ project, pullRequestId });
+      await this.#apiWrapper.deleteProjectItem({
+        project,
+        item,
+        clientMutationId: this.#clientMutationId,
+      });
     }
-  }
-
-  async #assignedProjects(pullRequestId) {
-    const { node: { projectsV2: { nodes } } } = await this.octokit.graphql.paginate(`
-      query paginate($cursor: String) {
-        node(id:"${pullRequestId}") {
-          ... on PullRequest {
-            number
-            projectsV2(first: 100, after: $cursor) {
-              nodes {
-                id
-                title
-              }
-              pageInfo {
-                hasNextPage
-                endCursor
-              }
-            }
-          }
-        }
-      }`);
-
-    return nodes;
-  }
-
-  // we need to know the item id of a PR in the project.
-  // we know this item exists
-  async #itemFor(project, pullRequestId) {
-    const { node: { items: { nodes } } } = await this.octokit.graphql.paginate(`
-      query paginate($cursor: String) {
-        node(id:"${project.id}") {
-          ... on ProjectV2 {
-            number
-            items(first: 100, after: $cursor) {
-              nodes {
-                id
-                content {
-                  ... on PullRequest {
-                    id
-                  }
-                }
-              }
-              pageInfo {
-                hasNextPage
-                endCursor
-              }
-            }
-          }
-        }
-      }`);
-
-    return nodes.find((item) => item.content.id === pullRequestId);
-  }
-
-  // requires GitHub App installation token with read and write
-  // permissions for projects v2 and pull requests
-  async #deleteProjectItem(project, item) {
-    const { deleteProjectV2Item: deletedItemId } = await this.octokit.graphql(`
-      mutation {
-        deleteProjectV2Item(
-          input: {
-            clientMutationId: "${this.clientMutationId}",
-            itemId: "${item.id}",
-            projectId: "${project.id}",
-          }
-        )
-        {
-          deletedItemId
-        }
-      }`);
-
-    return deletedItemId;
   }
 }
 
