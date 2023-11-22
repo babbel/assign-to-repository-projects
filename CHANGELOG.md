@@ -1,3 +1,6 @@
+## [1.0.3] - 2023-11-22
+- Update to node.js 20 and unpin @actions packages.
+
 ## [1.0.2] - 2023-07-10
 - Refactoring. Extract GraphQL calls to dedicated class and re-write tests replacing nock by fetch-mock
   for node.js versions larger than v16.
