@@ -1,3 +1,6 @@
+## [1.0.4] - 2023-11-23
+- Update action specification to node.js 20 and update actions/github lib.
+
 ## [1.0.3] - 2023-11-22
 - Update to node.js 20 and unpin @actions packages.
 
