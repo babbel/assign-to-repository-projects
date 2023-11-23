@@ -8,5 +8,5 @@ outputs:
   project-titles:
     description: 'List of space delimited projects titles the PR has been assiged to'
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
