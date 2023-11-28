@@ -1,7 +1,9 @@
 import { Octokit } from '@octokit/core';
-import fetchMock from 'fetch-mock'; // https://github.com/wheresrhys/fetch-mock
-
 import { paginateGraphql } from '@octokit/plugin-paginate-graphql';
+
+import { graphql, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+
 import { ApiWrapper } from '../apiwrapper';
 
 const GraphQlOctokit = Octokit.plugin(paginateGraphql);
@@ -9,20 +11,11 @@ const octokit = new GraphQlOctokit({ auth: 'fake-token-value' }); // don't use d
 
 const apiWrapper = new ApiWrapper({ octokit });
 
-const mockResponse = (name, data) => {
-  fetchMock.postOnce({
-    name,
-    matcher: 'https://api.github.com/graphql',
-    response: {
-      status: 200,
-      body: { data },
-    },
-  });
-};
+let server;
 
 describe('ApiWrapper', () => {
-  afterAll(() => {
-    fetchMock.reset();
+  afterEach(() => {
+    server.close();
   });
 
   describe('.fetchAssignedProjects()', () => {
@@ -44,13 +37,16 @@ describe('ApiWrapper', () => {
       },
     };
 
+    beforeAll(() => {
+      server = setupServer(
+        graphql.query(/paginate/, () => HttpResponse.json({ data })),
+      );
+      server.listen();
+    });
+
     const input = {
       pullRequestId: 'PVT_0000000000000001',
     };
-
-    beforeEach(() => { mockResponse('fetchAssignedProjects', data); });
-
-    afterEach(() => { fetchMock.reset(); });
 
     test('returns nodes', async () => {
       const nodes = await apiWrapper.fetchAssignedProjects(input);
@@ -80,13 +76,17 @@ describe('ApiWrapper', () => {
       },
     };
 
+    beforeAll(() => {
+      server = setupServer(
+        graphql.query(/paginate/, () => HttpResponse.json({ data })),
+      );
+      server.listen();
+    });
+
     const input = {
       project: { id: 'PVT_000000000000001' },
       pullRequestId: 'PR_0000000000000001',
     };
-
-    beforeEach(() => { mockResponse('fetchItemForPRId', data); });
-    afterEach(() => { fetchMock.reset(); });
 
     test('returns project v2 item node', async () => {
       const node = await apiWrapper.fetchItemForPRId(input);
@@ -101,14 +101,18 @@ describe('ApiWrapper', () => {
       },
     };
 
+    beforeAll(() => {
+      server = setupServer(
+        graphql.mutation(/deleteProjectV2Item/, () => HttpResponse.json({ data })),
+      );
+      server.listen();
+    });
+
     const input = {
       project: { id: 'PVT_000000000000001' },
       item: { id: 'PVTI_00000000000000000000000' },
       clientMutationId: 'foo',
     };
-
-    beforeEach(() => { mockResponse('deleteProjectItem', data); });
-    afterEach(() => { fetchMock.reset(); });
 
     test('returns id of delted item', async () => {
       const id = await apiWrapper.deleteProjectItem(input);
@@ -140,13 +144,17 @@ describe('ApiWrapper', () => {
       },
     };
 
+    beforeAll(() => {
+      server = setupServer(
+        graphql.query(/paginate/, () => HttpResponse.json({ data })),
+      );
+      server.listen();
+    });
+
     const input = {
       owner: 'acme',
       repositoryName: 'example-repository-name',
     };
-
-    beforeEach(() => { mockResponse('fetchRepositoryAndProjects', data); });
-    afterEach(() => { fetchMock.reset(); });
 
     test('returns object containing id', async () => {
       const repository = await apiWrapper.fetchRepositoryAndProjects(input);
@@ -163,14 +171,18 @@ describe('ApiWrapper', () => {
       },
     };
 
+    beforeAll(() => {
+      server = setupServer(
+        graphql.mutation(/assignPRtoProject/, () => HttpResponse.json({ data })),
+      );
+      server.listen();
+    });
+
     const input = {
       pullRequestId: 'PR_0000000000000001',
       project: { id: 'PVT_0000000000000001' },
       clientMutationId: 'foo',
     };
-
-    beforeEach(() => { mockResponse('assignPRtoProject', data); });
-    afterEach(() => { fetchMock.reset(); });
 
     test('returns object containing proect item', async () => {
       const item = await apiWrapper.assignPRtoProject(input);
@@ -183,6 +195,13 @@ describe('ApiWrapper', () => {
       updateProjectV2ItemFieldValue: { projectV2Item: { id: 'PVTI_0000000000000001' } },
     };
 
+    beforeAll(() => {
+      server = setupServer(
+        graphql.mutation(/updateItemFieldValue/, () => HttpResponse.json({ data })),
+      );
+      server.listen();
+    });
+
     const input = {
       project: { id: 'PVT_0000000000000001' },
       item: { id: 'PVTI_0000000000000001' },
@@ -190,9 +209,6 @@ describe('ApiWrapper', () => {
       todoOption: { id: 'PVSFO_0000000000000001' },
       clientMutationId: 'foo',
     };
-
-    beforeEach(() => { mockResponse('updateItemFieldValue', data); });
-    afterEach(() => { fetchMock.reset(); });
 
     test('returns updated field value item', async () => {
       const result = await apiWrapper.updateItemFieldValue(input);
