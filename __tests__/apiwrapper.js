@@ -1,8 +1,8 @@
 import { Octokit } from '@octokit/core';
 import { paginateGraphql } from '@octokit/plugin-paginate-graphql';
 
-import { graphql, HttpResponse } from 'msw';
-import { setupServer } from 'msw/node';
+import { graphql, HttpResponse } from 'msw'; // https://mswjs.io/docs/getting-started
+import { setupServer } from 'msw/node';  // https://mswjs.io/docs/getting-started/integrate/node
 
 import { ApiWrapper } from '../apiwrapper';
 
