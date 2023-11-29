@@ -14,116 +14,126 @@ const apiWrapper = new ApiWrapper({ octokit });
 
 const rpm = new RepositoryProjectsManager({ apiWrapper, ownerName: 'acme', repositoryName: 'example-repository' });
 
+let server;
+
+const mock = ({ action, matcher, data }) => {
+  const actions = {
+    mutation: graphql.mutation,
+    query: graphql.query,
+  };
+
+  return actions[action](matcher, () => HttpResponse.json({ data }), { once: true });
+};
+
 describe('RepositoryProjectsManager integration test', () => {
-  let server;
+  beforeAll(() => {
+    server = setupServer();
+    server.listen();
+  });
 
   afterEach(() => {
     server.close();
   });
 
   beforeEach(() => {
-    let count = 0;
-    server = setupServer(
+    server.use(
 
-      graphql.query(/paginate/, () => {
-        // registering mutiple handlers for the same matcher does not work.
-        // instead there is only this single handler for paginated GraphQL queres.
+      // fetchRepositoryAndProjects
+      mock({
+        action: 'query',
+        matcher: /paginate/,
+        data: {
+          repository: {
+            name: 'example-repository',
+            id: 'R_0000000001',
 
-        const orderedPaginatedQueryResponses = [
-          // fetchRepositoryAndProjects
-          {
-            data: {
-              repository: {
-                name: 'example-repository',
-                id: 'R_0000000001',
-
-                projectsV2: {
-                  nodes: [
-                    {
-                      id: 'PVT_0000000000000001',
-                      title: 'layer-100/bar',
-                      number: 1099,
-                      fields: {
-                        nodes: [
-                          {},
-                          {},
+            projectsV2: {
+              nodes: [
+                {
+                  id: 'PVT_0000000000000001',
+                  title: 'layer-100/bar',
+                  number: 1099,
+                  fields: {
+                    nodes: [
+                      {},
+                      {},
+                      {
+                        id: 'PVTSSF_00000000000000000000001',
+                        name: 'Status',
+                        options: [
                           {
-                            id: 'PVTSSF_00000000000000000000001',
-                            name: 'Status',
-                            options: [
-                              {
-                                id: '00000001',
-                                name: 'Todo',
-                              },
-                              {
-                                id: '00000002',
-                                name: 'In Progress',
-                              },
-                              {
-                                id: '00000003',
-                                name: 'Done',
-                              },
-                            ],
+                            id: '00000001',
+                            name: 'Todo',
                           },
-                          {},
-                          {},
+                          {
+                            id: '00000002',
+                            name: 'In Progress',
+                          },
+                          {
+                            id: '00000003',
+                            name: 'Done',
+                          },
                         ],
                       },
-                    },
-                  ],
-                  pageInfo: {
-                    hasNextPage: false,
-                    endCursor: 'Nw',
+                      {},
+                      {},
+                    ],
                   },
                 },
+              ],
+              pageInfo: {
+                hasNextPage: false,
+                endCursor: 'Nw',
               },
             },
           },
-
-          // fetchAssignedProjects
-          {
-            data: {
-              node: {
-                number: 74,
-                projectsV2: {
-                  nodes: [],
-                  pageInfo: {
-                    hasNextPage: false,
-                    endCursor: 'MQ',
-                  },
-                },
-              },
-            },
-          },
-
-          // fetchAssignedProjects (2nd call)
-          {
-            data: {
-              node: {
-                number: 74,
-                projectsV2: {
-                  nodes: [
-                    {
-                      id: 'PVT_0000000000000001',
-                      title: 'layer-100/bar',
-                    },
-                  ],
-                  pageInfo: {
-                    hasNextPage: false,
-                    endCursor: 'MQ',
-                  },
-                },
-              },
-            },
-          },
-        ];
-
-        const response = orderedPaginatedQueryResponses[count];
-        count += 1;
-        return HttpResponse.json(response);
+        },
       }),
 
-      graphql.mutation(/assignPRtoProject/, () => HttpResponse.json({
+      // fetchAssignedProjects
+      mock({
+        action: 'query',
+        matcher: /paginate/,
+        data: {
+          node: {
+            number: 74,
+            projectsV2: {
+              nodes: [],
+              pageInfo: {
+                hasNextPage: false,
+                endCursor: 'MQ',
+              },
+            },
+          },
+        },
+      }),
+
+      // fetchAssignedProjects (2nd call)
+      mock({
+        action: 'query',
+        matcher: /paginate/,
+        data: {
+          node: {
+            number: 74,
+            projectsV2: {
+              nodes: [
+                {
+                  id: 'PVT_0000000000000001',
+                  title: 'layer-100/bar',
+                },
+              ],
+              pageInfo: {
+                hasNextPage: false,
+                endCursor: 'MQ',
+              },
+            },
+          },
+        },
+      }),
+
+      mock({
+        action: 'mutation',
+        matcher: /assignPRtoProject/,
         data: {
           addProjectV2ItemById: {
             item: {
@@ -131,9 +141,11 @@ describe('RepositoryProjectsManager integration test', () => {
             },
           },
         },
-      })),
+      }),
 
-      graphql.mutation(/updateItemFieldValue/, () => HttpResponse.json({
+      mock({
+        action: 'mutation',
+        matcher: /updateItemFieldValue/,
         data: {
           updateProjectV2ItemFieldValue: {
             projectV2Item: {
@@ -141,9 +153,9 @@ describe('RepositoryProjectsManager integration test', () => {
             },
           },
         },
-      })),
+      }),
+
     );
-    server.listen();
   });
 
   test('when the PR is not assigned to a project yet', async () => {
