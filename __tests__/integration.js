@@ -1,7 +1,9 @@
-import fetchMock from 'fetch-mock'; // https://github.com/wheresrhys/fetch-mock
-
 import { Octokit } from '@octokit/core';
 import { paginateGraphql } from '@octokit/plugin-paginate-graphql';
+
+import { graphql, HttpResponse } from 'msw'; // https://mswjs.io/docs/getting-started
+import { setupServer } from 'msw/node'; // https://mswjs.io/docs/getting-started/integrate/node
+
 import { ApiWrapper } from '../apiwrapper';
 import { RepositoryProjectsManager } from '../projects.js'; // eslint-disable-line import/extensions
 
@@ -13,26 +15,28 @@ const apiWrapper = new ApiWrapper({ octokit });
 const rpm = new RepositoryProjectsManager({ apiWrapper, ownerName: 'acme', repositoryName: 'example-repository' });
 
 describe('RepositoryProjectsManager integration test', () => {
-  afterAll(() => {
-    fetchMock.reset();
-  });
+  let server;
 
   afterEach(() => {
-    fetchMock.reset();
+    server.close();
   });
 
   beforeEach(() => {
-    fetchMock
-      .postOnce({
-        name: 'fetchRepositoryAndProjects',
-        matcher: 'https://api.github.com/graphql',
-        response: {
-          status: 200,
-          body: {
+    let count = 0;
+    server = setupServer(
+
+      graphql.query(/paginate/, () => {
+        // registering mutiple handlers for the same matcher does not work.
+        // instead there is only this single handler for paginated GraphQL queres.
+
+        const orderedPaginatedQueryResponses = [
+          // fetchRepositoryAndProjects
+          {
             data: {
               repository: {
                 name: 'example-repository',
                 id: 'R_0000000001',
+
                 projectsV2: {
                   nodes: [
                     {
@@ -75,15 +79,9 @@ describe('RepositoryProjectsManager integration test', () => {
               },
             },
           },
-        },
-      })
 
-      .postOnce({
-        name: 'fetchAssignedProjects',
-        matcher: 'https://api.github.com/graphql',
-        response: {
-          status: 200,
-          body: {
+          // fetchAssignedProjects
+          {
             data: {
               node: {
                 number: 74,
@@ -97,49 +95,9 @@ describe('RepositoryProjectsManager integration test', () => {
               },
             },
           },
-        },
-      })
 
-      .postOnce({
-        name: 'addProjectV2ItemById',
-        matcher: 'https://api.github.com/graphql',
-        response: {
-          status: 200,
-          body: {
-            data: {
-              addProjectV2ItemById: {
-                item: {
-                  id: 'PVTI_0000000000000001',
-                },
-              },
-            },
-          },
-        },
-      })
-
-      .postOnce({
-        name: 'updateProjectV2ItemFieldValue',
-        matcher: 'https://api.github.com/graphql',
-        response: {
-          status: 200,
-          body: {
-            data: {
-              updateProjectV2ItemFieldValue: {
-                projectV2Item: {
-                  id: 'PVTI_0000000000000001',
-                },
-              },
-            },
-          },
-        },
-      })
-
-      .postOnce({
-        name: 'queryPullRequests2',
-        matcher: 'https://api.github.com/graphql',
-        response: {
-          status: 200,
-          body: {
+          // fetchAssignedProjects (2nd call)
+          {
             data: {
               node: {
                 number: 74,
@@ -158,8 +116,34 @@ describe('RepositoryProjectsManager integration test', () => {
               },
             },
           },
+        ];
+
+        const response = orderedPaginatedQueryResponses[count];
+        count += 1;
+        return HttpResponse.json(response);
+      }),
+
+      graphql.mutation(/assignPRtoProject/, () => HttpResponse.json({
+        data: {
+          addProjectV2ItemById: {
+            item: {
+              id: 'PVTI_0000000000000001',
+            },
+          },
         },
-      });
+      })),
+
+      graphql.mutation(/updateItemFieldValue/, () => HttpResponse.json({
+        data: {
+          updateProjectV2ItemFieldValue: {
+            projectV2Item: {
+              id: 'PVTI_0000000000000001',
+            },
+          },
+        },
+      })),
+    );
+    server.listen();
   });
 
   test('when the PR is not assigned to a project yet', async () => {
