@@ -1,3 +1,6 @@
+## [1.0.5] - 2023-11-29
+- Replace fetch-mock with MSW for mocking requests in tests.
+
 ## [1.0.4] - 2023-11-23
 - Update action specification to node.js 20 and update actions/github lib.
 

@@ -24,6 +24,7 @@ class ApiWrapper {
           }
         }
       }`);
+
     return nodes;
   }
 
@@ -60,7 +61,7 @@ class ApiWrapper {
   // permissions for projects v2 and pull requests
   async deleteProjectItem({ project, item, clientMutationId }) {
     const { deleteProjectV2Item: deletedItemId } = await this.#octokit.graphql(`
-      mutation {
+      mutation deleteProjectV2Item {
         deleteProjectV2Item(
           input: {
             clientMutationId: "${clientMutationId}",
@@ -114,7 +115,7 @@ class ApiWrapper {
   // permissions for projects v2 and pull requests
   async assignPRtoProject({ pullRequestId, project, clientMutationId }) {
     const { addProjectV2ItemById: { item } } = await this.#octokit.graphql(`
-      mutation {
+      mutation assignPRtoProject {
         addProjectV2ItemById(
           input: {
             clientMutationId: "${clientMutationId}",
@@ -137,7 +138,7 @@ class ApiWrapper {
   }) {
     // https://docs.github.com/en/graphql/reference/mutations#updateprojectv2itemfieldvalue
     const result = await this.#octokit.graphql(`
-      mutation {
+      mutation updateItemFieldValue {
         updateProjectV2ItemFieldValue(
           input: {
             clientMutationId: "${clientMutationId}",
