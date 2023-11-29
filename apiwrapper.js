@@ -24,6 +24,7 @@ class ApiWrapper {
           }
         }
       }`);
+
     return nodes;
   }
 

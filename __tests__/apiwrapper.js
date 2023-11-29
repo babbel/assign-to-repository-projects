@@ -2,7 +2,7 @@ import { Octokit } from '@octokit/core';
 import { paginateGraphql } from '@octokit/plugin-paginate-graphql';
 
 import { graphql, HttpResponse } from 'msw'; // https://mswjs.io/docs/getting-started
-import { setupServer } from 'msw/node';  // https://mswjs.io/docs/getting-started/integrate/node
+import { setupServer } from 'msw/node'; // https://mswjs.io/docs/getting-started/integrate/node
 
 import { ApiWrapper } from '../apiwrapper';
 
@@ -11,10 +11,29 @@ const octokit = new GraphQlOctokit({ auth: 'fake-token-value' }); // don't use d
 
 const apiWrapper = new ApiWrapper({ octokit });
 
-let server;
+const server = setupServer();
+
+const mock = ({ action, matcher, data }) => {
+  const actions = {
+    mutation: graphql.mutation,
+    query: graphql.query,
+  };
+
+  server.use(
+    actions[action](matcher, () => HttpResponse.json({ data })),
+  );
+};
 
 describe('ApiWrapper', () => {
+  beforeAll(() => {
+    server.listen();
+  });
+
   afterEach(() => {
+    server.resetHandlers();
+  });
+
+  afterAll(() => {
     server.close();
   });
 
@@ -37,11 +56,8 @@ describe('ApiWrapper', () => {
       },
     };
 
-    beforeAll(() => {
-      server = setupServer(
-        graphql.query(/paginate/, () => HttpResponse.json({ data })),
-      );
-      server.listen();
+    beforeEach(() => {
+      mock({ action: 'query', matcher: /paginate/, data });
     });
 
     const input = {
@@ -76,11 +92,8 @@ describe('ApiWrapper', () => {
       },
     };
 
-    beforeAll(() => {
-      server = setupServer(
-        graphql.query(/paginate/, () => HttpResponse.json({ data })),
-      );
-      server.listen();
+    beforeEach(() => {
+      mock({ action: 'query', matcher: /paginate/, data });
     });
 
     const input = {
@@ -101,11 +114,8 @@ describe('ApiWrapper', () => {
       },
     };
 
-    beforeAll(() => {
-      server = setupServer(
-        graphql.mutation(/deleteProjectV2Item/, () => HttpResponse.json({ data })),
-      );
-      server.listen();
+    beforeEach(() => {
+      mock({ action: 'mutation', matcher: /deleteProjectV2Item/, data });
     });
 
     const input = {
@@ -145,10 +155,7 @@ describe('ApiWrapper', () => {
     };
 
     beforeAll(() => {
-      server = setupServer(
-        graphql.query(/paginate/, () => HttpResponse.json({ data })),
-      );
-      server.listen();
+      mock({ action: 'query', matcher: /paginate/, data });
     });
 
     const input = {
@@ -172,10 +179,7 @@ describe('ApiWrapper', () => {
     };
 
     beforeAll(() => {
-      server = setupServer(
-        graphql.mutation(/assignPRtoProject/, () => HttpResponse.json({ data })),
-      );
-      server.listen();
+      mock({ action: 'mutation', matcher: /assignPRtoProject/, data });
     });
 
     const input = {
@@ -196,10 +200,7 @@ describe('ApiWrapper', () => {
     };
 
     beforeAll(() => {
-      server = setupServer(
-        graphql.mutation(/updateItemFieldValue/, () => HttpResponse.json({ data })),
-      );
-      server.listen();
+      mock({ action: 'mutation', matcher: /updateItemFieldValue/, data });
     });
 
     const input = {
