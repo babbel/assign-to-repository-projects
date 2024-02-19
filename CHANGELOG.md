@@ -1,3 +1,6 @@
+## [1.0.6] - 2024-02-19
+- Rependency update: undici security release
+
 ## [1.0.5] - 2023-11-29
 - Replace fetch-mock with MSW for mocking requests in tests.
 
