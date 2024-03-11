@@ -1,5 +1,10 @@
+# NOTE: CHANGELOG.md is deprecated
+
+After the release of v1.0.6, please see the [GitHub release notes](https://github.com/babbel/assign-to-repository-projects/releases)
+for the action in order to view the most up-to-date changes.
+
 ## [1.0.6] - 2024-02-19
-- Rependency update: undici security release
+- Dependency update: undici security release
 
 ## [1.0.5] - 2023-11-29
 - Replace fetch-mock with MSW for mocking requests in tests.
