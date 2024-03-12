@@ -31011,7 +31011,7 @@ __nccwpck_require__.a(__webpack_module__, async (__webpack_handle_async_dependen
  // eslint-disable-line import/extensions
  // eslint-disable-line import/extensions
 
-const GraphQlOctokit = _octokit_core__WEBPACK_IMPORTED_MODULE_2__.Octokit.plugin(_octokit_plugin_paginate_graphql__WEBPACK_IMPORTED_MODULE_3__.paginateGraphql);
+const GraphQlOctokit = _octokit_core__WEBPACK_IMPORTED_MODULE_2__.Octokit.plugin(_octokit_plugin_paginate_graphql__WEBPACK_IMPORTED_MODULE_3__.paginateGraphQL);
 
 // https://github.com/octokit/authentication-strategies.js
 // example: https://github.com/octokit/graphql.js/issues/61#issuecomment-542399763
