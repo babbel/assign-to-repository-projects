@@ -7,7 +7,16 @@
   "extends": "airbnb-base",
   "ignorePatterns": ["/dist/*.js"],
   "rules": {
-    "no-restricted-syntax": "off"
+    "no-restricted-syntax": "off",
+    "import/no-unresolved": [
+       "error",
+       {
+         "ignore": [
+           "@octokit/core",
+           "^@octokit/plugin-paginate-graphql"
+         ]
+       }
+    ]
   },
   "parserOptions": {
     "ecmaVersion": "latest",
