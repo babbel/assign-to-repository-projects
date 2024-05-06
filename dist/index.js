@@ -31085,9 +31085,15 @@ const GraphQlOctokit = _octokit_core__WEBPACK_IMPORTED_MODULE_2__/* .Octokit.plu
 const octokit = new GraphQlOctokit({ auth: process.env.GITHUB_TOKEN });
 const apiWrapper = new _apiwrapper_js__WEBPACK_IMPORTED_MODULE_4__/* .ApiWrapper */ .X({ octokit });
 
+const hasDuplicates = (array) => new Set(array).size !== array.length;
+
 try {
   const titlesInput = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('project-titles');
   const titles = titlesInput.split(/\s+/);
+
+  if (hasDuplicates(titles)) {
+    throw new Error(`Duplicate project titles are not allowed: ${titles}`);
+  }
 
   // requries a github action event of type pull_request
   const {

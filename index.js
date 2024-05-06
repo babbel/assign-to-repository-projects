@@ -15,9 +15,15 @@ const GraphQlOctokit = Octokit.plugin(paginateGraphQL);
 const octokit = new GraphQlOctokit({ auth: process.env.GITHUB_TOKEN });
 const apiWrapper = new ApiWrapper({ octokit });
 
+const hasDuplicates = (array) => new Set(array).size !== array.length;
+
 try {
   const titlesInput = core.getInput('project-titles');
   const titles = titlesInput.split(/\s+/);
+
+  if (hasDuplicates(titles)) {
+    throw new Error(`Duplicate project titles are not allowed: ${titles}`);
+  }
 
   // requries a github action event of type pull_request
   const {
