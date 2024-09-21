@@ -24,7 +24,7 @@
     "@actions/github": "*",
     "@octokit/graphql": "*",
     "@octokit/plugin-paginate-graphql": "*",
-    "msw": "^2.4.6"
+    "msw": "^2.4.9"
   },
   "devDependencies": {
     "@vercel/ncc": "*",
