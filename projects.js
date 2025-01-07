@@ -20,7 +20,9 @@ class RepositoryProjectsManager {
   async assign(pullRequestId, titles) {
     await this.#init();
 
-    const assignedProjects = await this.#apiWrapper.fetchAssignedProjects({ pullRequestId });
+    const assignedProjects = await this.#apiWrapper.fetchAssignedProjects({
+      pullRequestId,
+    });
     await this.#assignPRToProjects(pullRequestId, titles, assignedProjects);
     await this.#unassignPRFromProjects(pullRequestId, titles, assignedProjects);
 
@@ -63,8 +65,10 @@ class RepositoryProjectsManager {
 
   async #assignStatusTodo(project, item) {
     // the `Status` field and  `Todo` option are generated with each Project V2 by default.
-    const statusField = project.fields.nodes.find((n) => Object.keys(n) !== 0 && n.name === 'Status');
-    const todoOption = statusField.options.find((o) => o.name === 'Todo');
+    const statusField = project.fields.nodes.find(
+      (n) => Object.keys(n) !== 0 && n.name === "Status",
+    );
+    const todoOption = statusField.options.find((o) => o.name === "Todo");
 
     return this.#apiWrapper.updateItemFieldValue({
       project,
@@ -81,7 +85,10 @@ class RepositoryProjectsManager {
 
     for await (const project of projects) {
       // async, because more than 5 breaks API endpoint
-      const item = await this.#apiWrapper.fetchItemForPRId({ project, pullRequestId });
+      const item = await this.#apiWrapper.fetchItemForPRId({
+        project,
+        pullRequestId,
+      });
       await this.#apiWrapper.deleteProjectItem({
         project,
         item,

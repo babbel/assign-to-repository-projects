@@ -1,11 +1,11 @@
-import core from '@actions/core';
-import github from '@actions/github';
+import core from "@actions/core";
+import github from "@actions/github";
 
-import { Octokit } from '@octokit/core'; // eslint-disable-line import/no-extraneous-dependencies
-import { paginateGraphQL } from '@octokit/plugin-paginate-graphql';
+import { Octokit } from "@octokit/core"; // eslint-disable-line import/no-extraneous-dependencies
+import { paginateGraphQL } from "@octokit/plugin-paginate-graphql";
 
-import { ApiWrapper } from './apiwrapper.js'; // eslint-disable-line import/extensions
-import { RepositoryProjectsManager } from './projects.js'; // eslint-disable-line import/extensions
+import { ApiWrapper } from "./apiwrapper.js"; // eslint-disable-line import/extensions
+import { RepositoryProjectsManager } from "./projects.js"; // eslint-disable-line import/extensions
 
 const GraphQlOctokit = Octokit.plugin(paginateGraphQL);
 
@@ -18,7 +18,7 @@ const apiWrapper = new ApiWrapper({ octokit });
 const hasDuplicates = (array) => new Set(array).size !== array.length;
 
 try {
-  const titlesInput = core.getInput('project-titles');
+  const titlesInput = core.getInput("project-titles");
   const titles = titlesInput.split(/\s+/);
 
   if (hasDuplicates(titles)) {
@@ -45,7 +45,10 @@ try {
 
   const assignedProjectTitles = await rpm.assign(node_id, titles);
 
-  core.setOutput('project-titles', assignedProjectTitles.map((p) => p.title).join(' '));
+  core.setOutput(
+    "project-titles",
+    assignedProjectTitles.map((p) => p.title).join(" "),
+  );
 } catch (error) {
   core.setFailed(error.message);
 }

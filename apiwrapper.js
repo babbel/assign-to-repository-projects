@@ -6,7 +6,11 @@ class ApiWrapper {
   }
 
   async fetchAssignedProjects({ pullRequestId }) {
-    const { node: { projectsV2: { nodes } } } = await this.#octokit.graphql.paginate(`
+    const {
+      node: {
+        projectsV2: { nodes },
+      },
+    } = await this.#octokit.graphql.paginate(`
       query paginate($cursor: String) {
         node(id:"${pullRequestId}") {
           ... on PullRequest {
@@ -31,7 +35,11 @@ class ApiWrapper {
   // we need to know the item id of a PR in the project.
   // we know this item exists
   async fetchItemForPRId({ project, pullRequestId }) {
-    const { node: { items: { nodes } } } = await this.#octokit.graphql.paginate(`
+    const {
+      node: {
+        items: { nodes },
+      },
+    } = await this.#octokit.graphql.paginate(`
       query paginate($cursor: String) {
         node(id:"${project.id}") {
           ... on ProjectV2 {
@@ -114,7 +122,9 @@ class ApiWrapper {
   // requires GitHub App installation token with read and write
   // permissions for projects v2 and pull requests
   async assignPRtoProject({ pullRequestId, project, clientMutationId }) {
-    const { addProjectV2ItemById: { item } } = await this.#octokit.graphql(`
+    const {
+      addProjectV2ItemById: { item },
+    } = await this.#octokit.graphql(`
       mutation assignPRtoProject {
         addProjectV2ItemById(
           input: {
@@ -134,7 +144,11 @@ class ApiWrapper {
   }
 
   async updateItemFieldValue({
-    clientMutationId, project, item, statusField, todoOption,
+    clientMutationId,
+    project,
+    item,
+    statusField,
+    todoOption,
   }) {
     // https://docs.github.com/en/graphql/reference/mutations#updateprojectv2itemfieldvalue
     const result = await this.#octokit.graphql(`

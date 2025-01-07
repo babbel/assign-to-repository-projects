@@ -1,18 +1,22 @@
-import { Octokit } from '@octokit/core'; // eslint-disable-line import/no-extraneous-dependencies
-import { paginateGraphQL } from '@octokit/plugin-paginate-graphql';
+import { Octokit } from "@octokit/core"; // eslint-disable-line import/no-extraneous-dependencies
+import { paginateGraphQL } from "@octokit/plugin-paginate-graphql";
 
-import { graphql, HttpResponse } from 'msw'; // https://mswjs.io/docs/getting-started
-import { setupServer } from 'msw/node'; // https://mswjs.io/docs/getting-started/integrate/node
+import { graphql, HttpResponse } from "msw"; // https://mswjs.io/docs/getting-started
+import { setupServer } from "msw/node"; // https://mswjs.io/docs/getting-started/integrate/node
 
-import { ApiWrapper } from '../apiwrapper';
-import { RepositoryProjectsManager } from '../projects.js'; // eslint-disable-line import/extensions
+import { ApiWrapper } from "../apiwrapper";
+import { RepositoryProjectsManager } from "../projects.js"; // eslint-disable-line import/extensions
 
 const GraphQlOctokit = Octokit.plugin(paginateGraphQL);
-const octokit = new GraphQlOctokit({ auth: 'fake-token-value' }); // don't use default GITHUB_TOKEN token from env
+const octokit = new GraphQlOctokit({ auth: "fake-token-value" }); // don't use default GITHUB_TOKEN token from env
 
 const apiWrapper = new ApiWrapper({ octokit });
 
-const rpm = new RepositoryProjectsManager({ apiWrapper, ownerName: 'acme', repositoryName: 'example-repository' });
+const rpm = new RepositoryProjectsManager({
+  apiWrapper,
+  ownerName: "acme",
+  repositoryName: "example-repository",
+});
 
 let server;
 
@@ -22,10 +26,12 @@ const mock = ({ action, matcher, data }) => {
     query: graphql.query,
   };
 
-  return actions[action](matcher, () => HttpResponse.json({ data }), { once: true });
+  return actions[action](matcher, () => HttpResponse.json({ data }), {
+    once: true,
+  });
 };
 
-describe('RepositoryProjectsManager integration test', () => {
+describe("RepositoryProjectsManager integration test", () => {
   beforeAll(() => {
     server = setupServer();
     server.listen();
@@ -37,41 +43,40 @@ describe('RepositoryProjectsManager integration test', () => {
 
   beforeEach(() => {
     server.use(
-
       // fetchRepositoryAndProjects
       mock({
-        action: 'query',
+        action: "query",
         matcher: /paginate/,
         data: {
           repository: {
-            name: 'example-repository',
-            id: 'R_0000000001',
+            name: "example-repository",
+            id: "R_0000000001",
 
             projectsV2: {
               nodes: [
                 {
-                  id: 'PVT_0000000000000001',
-                  title: 'layer-100/bar',
+                  id: "PVT_0000000000000001",
+                  title: "layer-100/bar",
                   number: 1099,
                   fields: {
                     nodes: [
                       {},
                       {},
                       {
-                        id: 'PVTSSF_00000000000000000000001',
-                        name: 'Status',
+                        id: "PVTSSF_00000000000000000000001",
+                        name: "Status",
                         options: [
                           {
-                            id: '00000001',
-                            name: 'Todo',
+                            id: "00000001",
+                            name: "Todo",
                           },
                           {
-                            id: '00000002',
-                            name: 'In Progress',
+                            id: "00000002",
+                            name: "In Progress",
                           },
                           {
-                            id: '00000003',
-                            name: 'Done',
+                            id: "00000003",
+                            name: "Done",
                           },
                         ],
                       },
@@ -83,7 +88,7 @@ describe('RepositoryProjectsManager integration test', () => {
               ],
               pageInfo: {
                 hasNextPage: false,
-                endCursor: 'Nw',
+                endCursor: "Nw",
               },
             },
           },
@@ -92,7 +97,7 @@ describe('RepositoryProjectsManager integration test', () => {
 
       // fetchAssignedProjects
       mock({
-        action: 'query',
+        action: "query",
         matcher: /paginate/,
         data: {
           node: {
@@ -101,7 +106,7 @@ describe('RepositoryProjectsManager integration test', () => {
               nodes: [],
               pageInfo: {
                 hasNextPage: false,
-                endCursor: 'MQ',
+                endCursor: "MQ",
               },
             },
           },
@@ -110,7 +115,7 @@ describe('RepositoryProjectsManager integration test', () => {
 
       // fetchAssignedProjects (2nd call)
       mock({
-        action: 'query',
+        action: "query",
         matcher: /paginate/,
         data: {
           node: {
@@ -118,13 +123,13 @@ describe('RepositoryProjectsManager integration test', () => {
             projectsV2: {
               nodes: [
                 {
-                  id: 'PVT_0000000000000001',
-                  title: 'layer-100/bar',
+                  id: "PVT_0000000000000001",
+                  title: "layer-100/bar",
                 },
               ],
               pageInfo: {
                 hasNextPage: false,
-                endCursor: 'MQ',
+                endCursor: "MQ",
               },
             },
           },
@@ -132,36 +137,35 @@ describe('RepositoryProjectsManager integration test', () => {
       }),
 
       mock({
-        action: 'mutation',
+        action: "mutation",
         matcher: /assignPRtoProject/,
         data: {
           addProjectV2ItemById: {
             item: {
-              id: 'PVTI_0000000000000001',
+              id: "PVTI_0000000000000001",
             },
           },
         },
       }),
 
       mock({
-        action: 'mutation',
+        action: "mutation",
         matcher: /updateItemFieldValue/,
         data: {
           updateProjectV2ItemFieldValue: {
             projectV2Item: {
-              id: 'PVTI_0000000000000001',
+              id: "PVTI_0000000000000001",
             },
           },
         },
       }),
-
     );
   });
 
-  test('when the PR is not assigned to a project yet', async () => {
-    const titles = ['layer-100/bar'];
+  test("when the PR is not assigned to a project yet", async () => {
+    const titles = ["layer-100/bar"];
 
-    const pullRequestNumber = 'PR_0000000000000001';
+    const pullRequestNumber = "PR_0000000000000001";
 
     const outputProjects = await rpm.assign(pullRequestNumber, titles);
     const outputTitles = outputProjects.map((p) => p.title);
