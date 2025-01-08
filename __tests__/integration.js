@@ -14,7 +14,7 @@ const apiWrapper = new ApiWrapper({ octokit });
 
 const rpm = new RepositoryProjectsManager({ apiWrapper, ownerName: 'acme', repositoryName: 'example-repository' });
 
-let server;
+let server = null;
 
 const mock = ({ action, matcher, data }) => {
   const actions = {

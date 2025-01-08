@@ -4,7 +4,7 @@ import { ApiWrapper } from '../apiwrapper';
 import { RepositoryProjectsManager } from '../projects.js'; // eslint-disable-line import/extensions
 
 describe('RepositoryProjectsManager.assing() posts requests to the API', () => {
-  let rpm;
+  let rpm = null;
 
   beforeEach(() => {
     const apiWrapper = new ApiWrapper({ octokit: null });
@@ -121,7 +121,7 @@ describe('RepositoryProjectsManager.assing() posts requests to the API', () => {
 });
 
 describe('RepositoryProjectsManager.assing() posts requests to the API', () => {
-  let rpm;
+  let rpm = null;
 
   beforeEach(() => {
     const apiWrapper = new ApiWrapper({ octokit: null });
