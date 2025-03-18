@@ -16,4 +16,15 @@ jobs:
 
       # Jets requires an extra node flag to work with ES modules
       # cf. https://jestjs.io/docs/ecmascript-modules
-      - run: NODE_OPTIONS='--experimental-vm-modules' npm run test
+      - run: NODE_OPTIONS='--experimental-vm-modules' npm run test-coverage
+      
+      - name: Fetch Deepsource credentials
+        uses: lessonnine/deepsource-dsn-loader.actions@v1.0.1
+        with:
+          invoke-url: ${{ vars.DEEPSOURCE_DSN_INVOKE_URL }}
+          region: ${{ vars.DEEPSOURCE_DSN_REGION }}
+
+      - name: Report results to DeepSource
+        run: |
+          curl https://deepsource.io/cli | sh 
+          ./bin/deepsource report --analyzer test-coverage --key javascript --value-file ./coverage/lcov.info
