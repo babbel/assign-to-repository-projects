@@ -19,7 +19,7 @@ jobs:
       - run: NODE_OPTIONS='--experimental-vm-modules' npm run test-coverage
       
       - name: Fetch Deepsource credentials
-        uses: lessonnine/deepsource-dsn-loader.actions@v1.0.1
+        uses: lessonnine/deepsource-dsn-loader.actions@v1.0.2
         with:
           invoke-url: ${{ vars.DEEPSOURCE_DSN_INVOKE_URL }}
           region: ${{ vars.DEEPSOURCE_DSN_REGION }}
