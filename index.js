@@ -1,5 +1,5 @@
 import core from '@actions/core';
-import github from '@actions/github';
+import * as github from '@actions/github';
 
 import { Octokit } from '@octokit/core'; // eslint-disable-line import/no-extraneous-dependencies
 import { paginateGraphQL } from '@octokit/plugin-paginate-graphql';
