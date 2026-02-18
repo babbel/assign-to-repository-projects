@@ -1,4 +1,4 @@
-import core from '@actions/core';
+import { getInput, setFailed, setOutput } from '@actions/core';
 import { context } from '@actions/github';
 
 import { Octokit } from '@octokit/core'; // eslint-disable-line import/no-extraneous-dependencies
@@ -18,7 +18,7 @@ const apiWrapper = new ApiWrapper({ octokit });
 const hasDuplicates = (array) => new Set(array).size !== array.length;
 
 try {
-  const titlesInput = core.getInput('project-titles');
+  const titlesInput = getInput('project-titles');
   const titles = titlesInput.split(/\s+/);
 
   if (hasDuplicates(titles)) {
@@ -43,7 +43,7 @@ try {
 
   const assignedProjectTitles = await rpm.assign(node_id, titles);
 
-  core.setOutput('project-titles', assignedProjectTitles.map((p) => p.title).join(' '));
+  setOutput('project-titles', assignedProjectTitles.map((p) => p.title).join(' '));
 } catch (error) {
-  core.setFailed(error.message);
+  setFailed(error.message);
 }

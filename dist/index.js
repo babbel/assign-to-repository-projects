@@ -31640,7 +31640,7 @@ const apiWrapper = new _apiwrapper_js__WEBPACK_IMPORTED_MODULE_4__/* .ApiWrapper
 const hasDuplicates = (array) => new Set(array).size !== array.length;
 
 try {
-  const titlesInput = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('project-titles');
+  const titlesInput = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('project-titles');
   const titles = titlesInput.split(/\s+/);
 
   if (hasDuplicates(titles)) {
@@ -31665,9 +31665,9 @@ try {
 
   const assignedProjectTitles = await rpm.assign(node_id, titles);
 
-  _actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput('project-titles', assignedProjectTitles.map((p) => p.title).join(' '));
+  (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput)('project-titles', assignedProjectTitles.map((p) => p.title).join(' '));
 } catch (error) {
-  _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(error.message);
+  (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed)(error.message);
 }
 
 __webpack_async_result__();
