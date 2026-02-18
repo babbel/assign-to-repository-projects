@@ -31649,15 +31649,13 @@ try {
 
   // requries a github action event of type pull_request
   const {
-    /* context */ "_": {
-      payload: {
-        pull_request: {
-          node_id, // eslint-disable-line camelcase
-        },
-        repository,
+    payload: {
+      pull_request: {
+        node_id, // eslint-disable-line camelcase
       },
+      repository,
     },
-  } = _actions_github__WEBPACK_IMPORTED_MODULE_1__;
+  } = _actions_github__WEBPACK_IMPORTED_MODULE_1__/* .context */ ._;
 
   const rpm = new _projects_js__WEBPACK_IMPORTED_MODULE_5__/* .RepositoryProjectsManager */ .S({
     apiWrapper,
