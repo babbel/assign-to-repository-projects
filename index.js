@@ -1,5 +1,5 @@
 import core from '@actions/core';
-import github from '@actions/github';
+import { context } from '@actions/github';
 
 import { Octokit } from '@octokit/core'; // eslint-disable-line import/no-extraneous-dependencies
 import { paginateGraphQL } from '@octokit/plugin-paginate-graphql';
@@ -27,15 +27,13 @@ try {
 
   // requries a github action event of type pull_request
   const {
-    context: {
-      payload: {
-        pull_request: {
-          node_id, // eslint-disable-line camelcase
-        },
-        repository,
+    payload: {
+      pull_request: {
+        node_id, // eslint-disable-line camelcase
       },
+      repository,
     },
-  } = github;
+  } = context;
 
   const rpm = new RepositoryProjectsManager({
     apiWrapper,
