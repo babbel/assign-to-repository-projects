@@ -264,7 +264,7 @@ function exportVariable(name, val) {
  * @example
  * ```typescript
  * // Register an API token as a secret
- * const apiToken = "abc123xyz456";
+ * const apiToken = "...";
  * setSecret(apiToken);
  *
  * // Now any logs containing this value will show *** instead
