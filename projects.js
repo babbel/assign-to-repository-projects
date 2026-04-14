@@ -91,4 +91,4 @@ class RepositoryProjectsManager {
   }
 }
 
-export { RepositoryProjectsManager }; // eslint-disable-line import/prefer-default-export
+export { RepositoryProjectsManager };  

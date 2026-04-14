@@ -160,4 +160,4 @@ class ApiWrapper {
   }
 }
 
-export { ApiWrapper }; // eslint-disable-line import/prefer-default-export
+export { ApiWrapper };  
