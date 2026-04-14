@@ -27,10 +27,10 @@
     "msw": "^2.12.14"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@vercel/ncc": "*",
-    "eslint": "*",
-    "eslint-config-airbnb-base": "*",
-    "eslint-plugin-import": "*",
+    "eslint": "^10.2.0",
+    "eslint-plugin-n": "^17.24.0",
     "jest": "^30.3.0",
     "ts-jest": "^29.4.9"
   },
