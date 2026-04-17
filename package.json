@@ -24,7 +24,7 @@
     "@actions/github": "*",
     "@octokit/graphql": "*",
     "@octokit/plugin-paginate-graphql": "*",
-    "msw": "^2.13.3"
+    "msw": "^2.13.4"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
