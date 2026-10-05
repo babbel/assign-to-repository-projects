@@ -24,6 +24,7 @@
     "@actions/github": "*",
     "@octokit/graphql": "*",
     "@octokit/plugin-paginate-graphql": "*",
+    "graphql": "^17.0.2",
     "msw": "^3.0.1"
   },
   "devDependencies": {
