@@ -1,7 +1,8 @@
 import { Octokit } from '@octokit/core';  
 import { paginateGraphQL } from '@octokit/plugin-paginate-graphql';
 
-import { graphql, HttpResponse } from 'msw'; // https://mswjs.io/docs/getting-started
+import { HttpResponse } from 'msw';
+import { graphql } from 'msw/graphql'; // https://mswjs.io/docs/network-behavior/graphql
 import { setupServer } from 'msw/node'; // https://mswjs.io/docs/getting-started/integrate/node
 
 import { ApiWrapper } from '../apiwrapper';
@@ -14,12 +15,14 @@ const apiWrapper = new ApiWrapper({ octokit });
 
 const rpm = new RepositoryProjectsManager({ apiWrapper, ownerName: 'acme', repositoryName: 'example-repository' });
 
+const github = graphql.link('https://api.github.com/graphql'); // https://mswjs.io/docs/api/graphql#graphqllinkurl
+
 let server = null;
 
 const mock = ({ action, matcher, data }) => {
   const actions = {
-    mutation: graphql.mutation,
-    query: graphql.query,
+    mutation: github.mutation,
+    query: github.query,
   };
 
   return actions[action](matcher, () => HttpResponse.json({ data }), { once: true });
